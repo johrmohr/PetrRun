@@ -14,3 +14,77 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Player marker animations - Updated for Trombone Petr image */
+@keyframes playerBounce {
+  0%, 100% { 
+    transform: translateY(0px) scale(1); 
+  }
+  50% { 
+    transform: translateY(-2px) scale(1.05); 
+  }
+}
+
+@keyframes playerGlow {
+  0%, 100% {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  }
+  50% {
+    filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.7)) drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  }
+}
+
+/* Treasure marker glow */
+@keyframes treasureGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.8), 0 0 30px rgba(255, 165, 0, 0.6);
+  }
+}
+
+/* Apply animations to game elements */
+.game-map .z-20 img {
+  animation: playerBounce 1.5s infinite ease-in-out, playerGlow 2s infinite;
+}
+
+.game-map .z-10 > div[style*="rgb(255, 165, 0)"] {
+  animation: treasureGlow 2s infinite;
+}
+
+/* Smooth transitions for markers */
+.game-map .absolute {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Map container styling */
+.game-map {
+  background: #f3f4f6;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Smooth camera movement */
+.game-map.transition-transform {
+  transition: transform 200ms ease-out;
+}
+
+/* Instructions styling */
+.game-map .absolute.bottom-4 {
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Hover effects for interactive elements */
+.cursor-crosshair:hover {
+  cursor: crosshair;
+}
+
+/* Game UI improvements */
+.game-ui-overlay {
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
