@@ -144,12 +144,12 @@ export default function Game() {
       )}
       {/* Map always visible, but disables controls except in playing phase */}
       <div className="w-full h-full">
-        <GameMap
-          center={playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER}
-          zoom={18}
-          playerPosition={playerPos || undefined}
-          markers={
-            phase !== "start"
+        {(() => {
+          const gameMapProps: any = {
+            center: playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER,
+            zoom: 18,
+            playerPosition: playerPos || undefined,
+            markers: phase !== "start"
               ? [
                   {
                     position: currentDropsite.location,
@@ -158,12 +158,17 @@ export default function Game() {
                     color: "#ffa500",
                   },
                 ]
-              : []
+              : [],
+            onMapClick: handleMapClick,
+            onPlayerMove: phase === "playing" ? handlePlayerMove : undefined,
+          };
+          
+          if (GAME_CONFIG.MAP.GAME_BOUNDS) {
+            gameMapProps.bounds = GAME_CONFIG.MAP.GAME_BOUNDS as [[number, number], [number, number]];
           }
-          onMapClick={handleMapClick}
-          onPlayerMove={phase === "playing" ? handlePlayerMove : undefined}
-          bounds={GAME_CONFIG.MAP.GAME_BOUNDS as [[number, number], [number, number]]}
-        />
+          
+          return <GameMap {...gameMapProps} />;
+        })()}
       </div>
     </div>
   );
