@@ -62,14 +62,15 @@ export const DROP_RADIUS = 0.0002; // ~20m, adjust as needed
 // Game constants and configuration
 export const GAME_CONFIG = {
   MAP: {
-    DEFAULT_CENTER: [40.7128, -74.006] as [number, number], // NYC coordinates
+    DEFAULT_CENTER: [33.6455, -117.8443] as [number, number], // UCI campus center (moved higher)
     DEFAULT_ZOOM: 18, // High zoom for game-like experience
     MIN_ZOOM: 15,
     MAX_ZOOM: 20,
-    GAME_BOUNDS: [
-      [40.7, -74.02] as [number, number], // Southwest bound
-      [40.725, -73.99] as [number, number], // Northeast bound
-    ],
+    GAME_BOUNDS: undefined, // No bounds for now
+    // GAME_BOUNDS: [
+    //   [33.635, -117.850] as [number, number], // Southwest bound - UCI campus
+    //   [33.646, -117.838] as [number, number], // Northeast bound - UCI campus
+    // ],
   },
   PLAYER: {
     SPEED: 100, // pixels per second
