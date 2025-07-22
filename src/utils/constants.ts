@@ -5,6 +5,60 @@ export const stickerUrls = [
   "/stickers/Trombone_petr.png",
 ];
 
+// Available drop sites for random selection
+export const DROPSITES = [
+  {
+    id: "space-explorr",
+    name: "Space Exploration Center",
+    photo: "/stickers/Space-Explorr-Petr.png",
+    location: [33.6405, -117.8443] as [number, number], // Placeholder UCI coords
+    difficulty: "medium",
+    description: "The iconic space exploration center where Petr dreams of the stars"
+  },
+  {
+    id: "thanos-statue",
+    name: "The Purple Monument", 
+    photo: "/stickers/Thanos.png",
+    location: [33.6455, -117.8423] as [number, number], // Placeholder UCI coords
+    difficulty: "hard",
+    description: "A mysterious purple structure that appeared overnight"
+  },
+  {
+    id: "music-pavilion",
+    name: "Trombone Performance Stage",
+    photo: "/stickers/Trombone_petr.png", 
+    location: [33.6425, -117.8463] as [number, number], // Placeholder UCI coords
+    difficulty: "easy",
+    description: "Where Petr practices his musical talents"
+  },
+  {
+    id: "aldrich-park",
+    name: "Central Park Gazebo",
+    photo: "/stickers/Space-Explorr-Petr.png", // Reusing for now
+    location: [33.6435, -117.8433] as [number, number], // Placeholder UCI coords  
+    difficulty: "medium",
+    description: "The heart of campus where students gather"
+  },
+  {
+    id: "engineering-tower",
+    name: "The Engineering Spire", 
+    photo: "/stickers/Thanos.png", // Reusing for now
+    location: [33.6465, -117.8413] as [number, number], // Placeholder UCI coords
+    difficulty: "hard", 
+    description: "The tallest structure visible from across campus"
+  },
+  {
+    id: "student-center",
+    name: "Student Hub Commons",
+    photo: "/stickers/Trombone_petr.png", // Reusing for now
+    location: [33.6415, -117.8453] as [number, number], // Placeholder UCI coords
+    difficulty: "easy",
+    description: "Where Petrs fuel up between classes"
+  }
+] as const;
+
+export const DROP_RADIUS = 0.0002; // ~20m, adjust as needed
+
 // Game constants and configuration
 export const GAME_CONFIG = {
   MAP: {
