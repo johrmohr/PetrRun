@@ -5,13 +5,13 @@ export const stickerUrls = [
   "/stickers/Trombone_petr.png",
 ];
 
-// Available drop sites for random selection
+// Available drop sites for random selection (pixel coordinates [x, y])
 export const DROPSITES = [
   {
     id: "space-explorr",
     name: "Space Exploration Center",
     photo: "/stickers/Space-Explorr-Petr.png",
-    location: [33.6405, -117.8443] as [number, number], // Placeholder UCI coords
+    location: [400, 300] as [number, number], // Pixel coordinates [x, y]
     difficulty: "medium",
     description: "The iconic space exploration center where Petr dreams of the stars"
   },
@@ -19,7 +19,7 @@ export const DROPSITES = [
     id: "thanos-statue",
     name: "The Purple Monument", 
     photo: "/stickers/Thanos.png",
-    location: [33.6455, -117.8423] as [number, number], // Placeholder UCI coords
+    location: [600, 200] as [number, number], // Pixel coordinates [x, y]
     difficulty: "hard",
     description: "A mysterious purple structure that appeared overnight"
   },
@@ -27,7 +27,7 @@ export const DROPSITES = [
     id: "music-pavilion",
     name: "Trombone Performance Stage",
     photo: "/stickers/Trombone_petr.png", 
-    location: [33.6425, -117.8463] as [number, number], // Placeholder UCI coords
+    location: [300, 500] as [number, number], // Pixel coordinates [x, y]
     difficulty: "easy",
     description: "Where Petr practices his musical talents"
   },
@@ -35,7 +35,7 @@ export const DROPSITES = [
     id: "aldrich-park",
     name: "Central Park Gazebo",
     photo: "/stickers/Space-Explorr-Petr.png", // Reusing for now
-    location: [33.6435, -117.8433] as [number, number], // Placeholder UCI coords  
+    location: [500, 400] as [number, number], // Pixel coordinates [x, y]
     difficulty: "medium",
     description: "The heart of campus where students gather"
   },
@@ -43,7 +43,7 @@ export const DROPSITES = [
     id: "engineering-tower",
     name: "The Engineering Spire", 
     photo: "/stickers/Thanos.png", // Reusing for now
-    location: [33.6465, -117.8413] as [number, number], // Placeholder UCI coords
+    location: [700, 150] as [number, number], // Pixel coordinates [x, y]
     difficulty: "hard", 
     description: "The tallest structure visible from across campus"
   },
@@ -51,31 +51,27 @@ export const DROPSITES = [
     id: "student-center",
     name: "Student Hub Commons",
     photo: "/stickers/Trombone_petr.png", // Reusing for now
-    location: [33.6415, -117.8453] as [number, number], // Placeholder UCI coords
+    location: [350, 600] as [number, number], // Pixel coordinates [x, y]
     difficulty: "easy",
     description: "Where Petrs fuel up between classes"
   }
 ] as const;
 
-export const DROP_RADIUS = 0.0002; // ~20m, adjust as needed
+export const DROP_RADIUS = 50; // pixels, adjust as needed
 
 // Game constants and configuration
 export const GAME_CONFIG = {
   MAP: {
-    DEFAULT_CENTER: [33.6455, -117.8443] as [number, number], // UCI campus center (moved higher)
-    DEFAULT_ZOOM: 18, // High zoom for game-like experience
+    DEFAULT_CENTER: [500, 400] as [number, number], // Center of image (assuming ~1000x800 image)
+    DEFAULT_ZOOM: 18, // Not used for static image, kept for compatibility
     MIN_ZOOM: 15,
     MAX_ZOOM: 20,
-    GAME_BOUNDS: undefined, // No bounds for now
-    // GAME_BOUNDS: [
-    //   [33.635, -117.850] as [number, number], // Southwest bound - UCI campus
-    //   [33.646, -117.838] as [number, number], // Northeast bound - UCI campus
-    // ],
+    GAME_BOUNDS: undefined, // No bounds for static image
   },
   PLAYER: {
     SPEED: 100, // pixels per second
     SIZE: 24,
-    MOVE_DISTANCE: 0.0001, // Movement sensitivity for WASD
+    MOVE_DISTANCE: 10, // Movement distance in pixels for WASD
   },
   MARKERS: {
     CHECKPOINT: {
