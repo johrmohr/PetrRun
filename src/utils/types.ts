@@ -76,3 +76,12 @@ export interface Sticker {
   scale?: number;
   rotation?: number;
 }
+
+export interface Dropsite {
+  id: string;
+  name: string;
+  photo: string;
+  location: [number, number];
+  difficulty: "easy" | "medium" | "hard";
+  description: string;
+}
