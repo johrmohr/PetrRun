@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
-
-
 // Lines for animated text - each will appear as separate bubble
 const introLines = [
   "👋 Welcome to UCI's Petr Run! A petr is a cartoon drawing of UCI's mascot, Peter the Anteater.",
