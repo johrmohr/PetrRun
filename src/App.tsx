@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
+
+
 // Lines for animated text - each will appear as separate bubble
 const introLines = [
   "👋 Welcome to UCI's Petr Run! A petr is a cartoon drawing of UCI's mascot, Peter the Anteater.",
@@ -97,7 +99,11 @@ useEffect(() => {
   }
 
   return (
-    <main className="relative flex h-screen w-screen bg-black overflow-hidden">
+    <main
+  className="relative flex h-screen w-screen bg-cover bg-center overflow-hidden"
+  style={{ backgroundImage: "url('/UCI_map.png')" }}
+>
+
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
 
@@ -125,7 +131,6 @@ useEffect(() => {
             {currentLine === introLines.length ? (
               <div className="flex flex-wrap justify-between items-center gap-4">
                 <span>Ready to join the run? 🏃‍♂️</span>
-                
                 <Link
                 to="/game"
                 className="px-6 py-3 text-lg sm:text-xl font-semibold rounded-xl bg-blue-400 text-white shadow-md hover:scale-105 transition-transform duration-200 text-center"
