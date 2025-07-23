@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useImageDimensions } from "../hooks/useImageDimensions";
 import ZoomSlider from "./ZoomSlider";
 
 interface GameMarker {
@@ -7,6 +6,12 @@ interface GameMarker {
   popup?: string;
   type?: "player" | "checkpoint" | "obstacle" | "treasure" | "enemy" | "default";
   color?: string;
+}
+
+interface ImageDimensions {
+  width: number;
+  height: number;
+  aspectRatio: number;
 }
 
 interface GameMapProps {
@@ -18,6 +23,7 @@ interface GameMapProps {
   playerPosition?: [number, number]; // [x, y] pixels
   onMapClick?: (position: { x: number; y: number }) => void;
   onPlayerMove?: (newPosition: [number, number]) => void;
+  imageDimensions: ImageDimensions; // New prop for image dimensions
 }
 
 // WASD Controls Component
@@ -30,10 +36,10 @@ function WASDControls({
   onPlayerMove?: (newPosition: [number, number]) => void;
   playerPosition?: [number, number];
   mapRef: React.RefObject<HTMLDivElement | null>;
-  imageDimensions: { width: number; height: number; isLoaded: boolean };
+  imageDimensions: ImageDimensions;
 }) {
   useEffect(() => {
-    if (!onPlayerMove || !playerPosition || !imageDimensions.isLoaded) return;
+    if (!onPlayerMove || !playerPosition) return;
 
     const moveDistance = 10;
 
@@ -83,10 +89,10 @@ const GameMap: React.FC<GameMapProps> = ({
   onPlayerMove,
   height = "100%",
   width = "100%",
+  imageDimensions,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const imageDimensions = useImageDimensions("/UCI_map.png");
   // Load zoom level from localStorage or use default
   const [zoomLevel, setZoomLevel] = useState(() => {
     const savedZoom = localStorage.getItem('petrrun-zoom-level');
@@ -186,7 +192,7 @@ const GameMap: React.FC<GameMapProps> = ({
   };
 
   // Show loading while detecting image dimensions
-  if (!imageDimensions.isLoaded) {
+  if (!imageDimensions) {
     return (
       <div className="relative w-full h-full flex items-center justify-center bg-gray-200">
         <div className="text-center">
@@ -240,14 +246,14 @@ const GameMap: React.FC<GameMapProps> = ({
           <div
             className="absolute z-20 pointer-events-none"
             style={{
-              left: playerPosition[0] - 16, // Half of 32px width
-              top: playerPosition[1] - 16,  // Half of 32px height
+              left: playerPosition[0] - 32, // Half of 64px width
+              top: playerPosition[1] - 32,  // Half of 64px height
             }}
           >
             <img 
               src="/stickers/Trombone_petr.png" 
               alt="Player" 
-              className="w-8 h-8 object-contain drop-shadow-lg"
+              className="w-16 h-16 object-contain drop-shadow-lg"
               style={{
                 filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
               }}

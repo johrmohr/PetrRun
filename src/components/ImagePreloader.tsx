@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
+interface ImageDimensions {
+  width: number;
+  height: number;
+  aspectRatio: number;
+}
+
 interface ImagePreloaderProps {
   imageSrc: string;
-  children: React.ReactNode;
+  children: (dimensions: ImageDimensions) => React.ReactNode;
   fallbackComponent?: React.ReactNode;
 }
 
@@ -14,10 +20,15 @@ const ImagePreloader: React.FC<ImagePreloaderProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [dimensions, setDimensions] = useState<ImageDimensions>({
+    width: 2000,
+    height: 1600,
+    aspectRatio: 1.25
+  });
 
   useEffect(() => {
     const img = new Image();
-    let loadingInterval: NodeJS.Timeout;
+    let loadingInterval: number;
 
     // Simulate loading progress since we can't track actual progress easily
     const simulateProgress = () => {
@@ -32,6 +43,15 @@ const ImagePreloader: React.FC<ImagePreloaderProps> = ({
     const handleLoad = () => {
       clearInterval(loadingInterval);
       setLoadingProgress(100);
+      
+      // Capture image dimensions
+      const imageDimensions: ImageDimensions = {
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+        aspectRatio: img.naturalWidth / img.naturalHeight
+      };
+      setDimensions(imageDimensions);
+      
       // Small delay to show 100% before transitioning
       setTimeout(() => {
         setIsLoaded(true);
@@ -41,6 +61,13 @@ const ImagePreloader: React.FC<ImagePreloaderProps> = ({
     const handleError = () => {
       clearInterval(loadingInterval);
       setError('Failed to load map image. Please refresh and try again.');
+      
+      // Set fallback dimensions for UCI map
+      setDimensions({
+        width: 2000,
+        height: 1600,
+        aspectRatio: 2000 / 1600
+      });
     };
 
     img.onload = handleLoad;
@@ -113,7 +140,7 @@ const ImagePreloader: React.FC<ImagePreloaderProps> = ({
     );
   }
 
-  return <>{children}</>;
+  return <>{children(dimensions)}</>;
 };
 
 export default ImagePreloader; 

@@ -386,3 +386,30 @@ This project was specifically created for the **2025 Summer GitHub/UCI Hackathon
 - **Mascot Integration**: Creative use of Petr the Anteater in multiple themed scenarios
 
 The project demonstrates full-stack development skills, creative problem-solving, and deep integration with campus culture and geography. 
+
+---
+
+## 📝 Recent Changes
+
+### Double Loading Fix (Latest)
+- **Problem**: Map image was being loaded twice - once by ImagePreloader and again by useImageDimensions hook in GameMap
+- **Symptom**: Loading screen showed 100% but then "Preparing map..." appeared, causing additional delay
+- **Solution**: Enhanced ImagePreloader to capture image dimensions during initial load using render prop pattern
+- **Impact**: Eliminated second loading delay, map appears immediately after progress bar completes
+- **Files Modified**:
+  - `src/components/ImagePreloader.tsx`: Added ImageDimensions interface, modified to use render prop pattern with dimensions
+  - `src/components/GameMap.tsx`: Removed useImageDimensions hook dependency, now accepts dimensions as props
+  - `src/pages/Game.tsx`: Updated to use new ImagePreloader render prop pattern
+- **Technical Details**: 
+  - ImagePreloader now captures img.naturalWidth/naturalHeight on load
+  - GameMap receives pre-calculated dimensions instead of loading image again
+  - Browser cache was not sufficient due to different loading contexts
+
+### Character Size Enhancement
+- **Updated**: Petr character display size in GameMap component
+- **Change**: Increased from 32px × 32px (w-8 h-8) to 64px × 64px (w-16 h-16)
+- **Impact**: Makes the player character more prominent and visible during gameplay
+- **Files Modified**:
+  - `src/components/GameMap.tsx`: Updated player marker size and positioning offsets
+  - `src/utils/constants.ts`: Updated PLAYER.SIZE constant from 24 to 64 for consistency
+- **Technical Details**: Adjusted positioning offsets from -16px to -32px to maintain proper centering 

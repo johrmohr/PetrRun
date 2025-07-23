@@ -70,7 +70,7 @@ export const GAME_CONFIG = {
   },
   PLAYER: {
     SPEED: 100, // pixels per second
-    SIZE: 24,
+    SIZE: 64, // Updated to match new visual size (was 24)
     MOVE_DISTANCE: 10, // Increased for larger map (was 5)
   },
   MARKERS: {
