@@ -33,7 +33,7 @@ useEffect(() => {
       const timeout = setTimeout(() => {
         setDisplayedText((prev) => prev + fullLine[charIndex]);
         setCharIndex((prev) => prev + 1);
-      }, currentLine === 0 && charIndex === 0 ? 1 : 24);
+      }, currentLine === 0 && charIndex === 0 ? 5 : 50);
       return () => clearTimeout(timeout);
     } else {
       const linePause = setTimeout(() => {
@@ -154,7 +154,7 @@ const handleStartGame = () => {
           {currentLine === introLines.length ? (
             <div className="flex items-center gap-3">
               <span className="text-white text-base sm:text-lg md:text-xl font-semibold">
-                Ready to join the run? 🏃‍♂️
+                
               </span>
               <Link
                 to="/game"
