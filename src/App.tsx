@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 
 // Lines for animated text - each will appear as separate bubble
 const introLines = [
@@ -124,12 +125,14 @@ useEffect(() => {
             {currentLine === introLines.length ? (
               <div className="flex flex-wrap justify-between items-center gap-4">
                 <span>Ready to join the run? 🏃‍♂️</span>
-                <button
-                  onClick={() => console.log("Start Game clicked!")}
-                  className="px-6 py-3 text-lg sm:text-xl font-semibold rounded-xl bg-blue-400 text-white shadow-md hover:scale-105 transition-transform duration-200"
-                >
-                  🚀 Start Game
-                </button>
+                
+                <Link
+                to="/game"
+                className="px-6 py-3 text-lg sm:text-xl font-semibold rounded-xl bg-blue-400 text-white shadow-md hover:scale-105 transition-transform duration-200 text-center"
+              >
+                Start Game
+              </Link>
+
               </div>
             ) : (
               introLines[currentLine - 1]
