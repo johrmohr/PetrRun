@@ -47,17 +47,14 @@ useEffect(() => {
 }, [charIndex, currentLine, gameStarted]);
 
 
-
-
 const handleStartGame = () => {
-  const audio = document.getElementById("bg-music");
+  const audio = document.getElementById("bg-music") as HTMLAudioElement | null;
   if (audio) {
     audio.muted = false;
-    audio.play();
+    audio.play().catch((err) => console.error("Failed to play audio:", err));
   }
   setGameStarted(true);
 };
-
 
   const handleSkipTutorial = () => {
     setGameStarted(true);
