@@ -8,52 +8,52 @@ export const stickerUrls = [
 // Available drop sites for random selection (pixel coordinates [x, y])
 export const DROPSITES = [
   {
-    id: "space-explorr",
-    name: "Space Exploration Center",
-    photo: "/stickers/Space-Explorr-Petr.png",
-    location: [400, 300] as [number, number], // Pixel coordinates [x, y]
+    id: "university-club",
+    name: "University Club",
+    photo: "/Locations/University_Club.png",
+    location: [100, 100] as [number, number], // Placeholder coordinates
     difficulty: "medium",
-    description: "The iconic space exploration center where Petr dreams of the stars"
+    description: "A popular spot for faculty and staff gatherings, known for its elegant setting."
   },
   {
-    id: "thanos-statue",
-    name: "The Purple Monument", 
-    photo: "/stickers/Thanos.png",
-    location: [600, 200] as [number, number], // Pixel coordinates [x, y]
+    id: "student-center-tables",
+    name: "Student Center Tables",
+    photo: "/Locations/Student_Center_Tables.png",
+    location: [200, 200] as [number, number], // Placeholder coordinates
+    difficulty: "easy",
+    description: "The bustling heart of campus where students meet, eat, and study together."
+  },
+  {
+    id: "social-science-plaza",
+    name: "Social Science Plaza",
+    photo: "/Locations/Social_Science_Plaza.png",
+    location: [300, 300] as [number, number], // Placeholder coordinates
+    difficulty: "medium",
+    description: "A scenic plaza surrounded by academic buildings and lively student activity."
+  },
+  {
+    id: "humanities-bridge",
+    name: "Humanities Bridge",
+    photo: "/Locations/Humanities_Bridge.png",
+    location: [400, 400] as [number, number], // Placeholder coordinates
     difficulty: "hard",
-    description: "A mysterious purple structure that appeared overnight"
+    description: "An iconic bridge connecting the humanities buildings, offering great views."
   },
   {
-    id: "music-pavilion",
-    name: "Trombone Performance Stage",
-    photo: "/stickers/Trombone_petr.png", 
-    location: [300, 500] as [number, number], // Pixel coordinates [x, y]
-    difficulty: "easy",
-    description: "Where Petr practices his musical talents"
-  },
-  {
-    id: "aldrich-park",
-    name: "Central Park Gazebo",
-    photo: "/stickers/Space-Explorr-Petr.png", // Reusing for now
-    location: [500, 400] as [number, number], // Pixel coordinates [x, y]
+    id: "bio-sci-garden",
+    name: "Biological Sciences Garden",
+    photo: "/Locations/Bio_Sci_Garden.png",
+    location: [500, 500] as [number, number], // Placeholder coordinates
     difficulty: "medium",
-    description: "The heart of campus where students gather"
+    description: "A lush garden area perfect for quiet study and enjoying nature."
   },
   {
-    id: "engineering-tower",
-    name: "The Engineering Spire", 
-    photo: "/stickers/Thanos.png", // Reusing for now
-    location: [700, 150] as [number, number], // Pixel coordinates [x, y]
-    difficulty: "hard", 
-    description: "The tallest structure visible from across campus"
-  },
-  {
-    id: "student-center",
-    name: "Student Hub Commons",
-    photo: "/stickers/Trombone_petr.png", // Reusing for now
-    location: [350, 600] as [number, number], // Pixel coordinates [x, y]
-    difficulty: "easy",
-    description: "Where Petrs fuel up between classes"
+    id: "back-of-sci-lib",
+    name: "Back of Science Library",
+    photo: "/Locations/Back_of_Sci_Lib.png",
+    location: [600, 600] as [number, number], // Placeholder coordinates
+    difficulty: "hard",
+    description: "A hidden spot behind the Science Library, favored by those seeking solitude."
   }
 ] as const;
 
@@ -169,3 +169,19 @@ export const SAMPLE_GAME_DATA = {
     },
   ],
 };
+
+// List of location images for random selection
+export const LOCATION_IMAGES = [
+  "/Locations/University_Club.png",
+  "/Locations/Student_Center_Tables.png",
+  "/Locations/Social_Science_Plaza.png",
+  "/Locations/Humanities_Bridge.png",
+  "/Locations/Bio_Sci_Garden.png",
+  "/Locations/Back_of_Sci_Lib.png",
+];
+
+// Function to select a random location image
+export function selectRandomLocationImage() {
+  const idx = Math.floor(Math.random() * LOCATION_IMAGES.length);
+  return LOCATION_IMAGES[idx];
+}

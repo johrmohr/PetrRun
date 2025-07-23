@@ -20,6 +20,7 @@ export default function Game() {
   const [timer, setTimer] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(3);
+  const [resetKey, setResetKey] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Start selection: player clicks map to set start
@@ -44,7 +45,6 @@ export default function Game() {
         const id = setTimeout(() => setCountdown((c) => c - 1), 1000);
         return () => clearTimeout(id);
       } else {
-        // Go directly to playing phase after countdown
         setPhase("playing");
         setStartTime(Date.now());
       }
@@ -65,15 +65,14 @@ export default function Game() {
     }
   }, [phase, startTime]);
 
-  // WASD movement handler (delegated to GameMap)
+  // WASD movement handler
   const handlePlayerMove = (newPos: [number, number]) => {
+    if (phase === "results" || phase === "victory") return;
     setPlayerPos(newPos);
-    // Check victory using current dropsite location (pixel distance)
     const distance = Math.sqrt(
       Math.pow(newPos[0] - currentDropsite.location[0], 2) + 
       Math.pow(newPos[1] - currentDropsite.location[1], 2)
     );
-    
     if (distance < DROP_RADIUS) {
       setPhase("victory");
     }
@@ -88,12 +87,13 @@ export default function Game() {
 
   // Reset for new round
   const handleRestart = () => {
-    setPhase("start");
+    setCurrentDropsite(selectRandomDropsite());
     setPlayerPos(null);
     setTimer(0);
     setStartTime(null);
-    // Select a new random dropsite for the next round
-    setCurrentDropsite(selectRandomDropsite());
+    setCountdown(3);
+    setPhase("start");
+    setResetKey((prev) => prev + 1);
   };
 
   // UI rendering by phase
@@ -105,35 +105,39 @@ export default function Game() {
           <p className="text-gray-600">Click anywhere on the map to begin.</p>
         </div>
       )}
-      {phase === "countdown" && (
-        <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-white bg-opacity-95 p-8 rounded-lg shadow-xl text-center">
-          <div className="text-5xl font-bold text-blue-600">
-            {countdown > 0 ? countdown : "🎯 ZOT!"}
+      {(phase === "playing") && (
+        <div className="absolute z-10 top-8 right-8 game-ui-overlay bg-white bg-opacity-95 p-3 rounded-lg shadow-xl text-center w-64 flex flex-col items-center border border-gray-200">
+          <h3 className="text-base font-bold mb-2 text-gray-800">Find the drop location</h3>
+          <img 
+            src={currentDropsite.photo} 
+            alt={currentDropsite.name} 
+            className="w-56 h-40 object-cover rounded-lg shadow m-0" 
+            style={{ display: 'block', margin: 0, padding: 0, border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+          />
+          <p className="text-xs text-gray-600 mt-2">{currentDropsite.description}</p>
+          <p className="text-xs text-gray-500 mt-1 bg-gray-100 px-2 py-1 rounded">
+            Difficulty: {currentDropsite.difficulty}
+          </p>
+          <div className="flex flex-col items-center mt-3 w-full">
+            <div className="text-2xl font-mono font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg w-full">
+              {(timer / 1000).toFixed(2)}s
+            </div>
           </div>
         </div>
       )}
-      {phase === "playing" && (
-        <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-white bg-opacity-95 p-6 rounded-lg shadow-xl text-center">
-          <div className="flex items-center gap-6">
-            {/* Photo on the left */}
-            <div className="flex-shrink-0">
-              <h3 className="text-lg font-bold mb-2 text-gray-800">Find this location!</h3>
-              <img src={currentDropsite.photo} alt="Drop site" className="w-48 h-48 object-contain rounded-lg shadow-md" />
-              <p className="text-sm text-gray-600 mt-2">{currentDropsite.description}</p>
-              <p className="text-xs text-gray-500 mt-1 bg-gray-100 px-2 py-1 rounded">
-                Difficulty: {currentDropsite.difficulty}
-              </p>
-            </div>
-            {/* Timer and info on the right */}
-            <div className="flex flex-col items-center">
-              <div className="text-3xl font-mono font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
-                {(timer / 1000).toFixed(2)}s
-              </div>
-              <p className="text-sm text-gray-600 mt-2">Use WASD to move</p>
-              <p className="text-xs text-gray-500 mt-1">Find the drop location!</p>
+      {phase === "countdown" && (
+        <>
+          <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-white bg-opacity-95 p-8 rounded-lg shadow-xl text-center">
+            <div className="text-5xl font-bold text-blue-600">
+              {countdown > 0 ? countdown : "🎯 ZOT!"}
             </div>
           </div>
-        </div>
+          <div className="absolute z-10 top-40 left-1/2 -translate-x-1/2 text-center">
+            <p className="text-lg text-gray-700 bg-white bg-opacity-40 px-4 py-2 rounded shadow" style={{opacity: 0.7}}>
+              Use WASD to move
+            </p>
+          </div>
+        </>
       )}
       {phase === "victory" && (
         <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-green-50 bg-opacity-95 border-2 border-green-200 p-6 rounded-lg shadow-xl text-center">
@@ -160,7 +164,6 @@ export default function Game() {
           </button>
         </div>
       )}
-      {/* Map always visible, but disables controls except in playing phase */}
       <div className="w-full h-full">
         <GameMap
           center={playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER}
@@ -180,6 +183,8 @@ export default function Game() {
           }
           onMapClick={handleMapClick}
           onPlayerMove={phase === "playing" ? handlePlayerMove : undefined}
+          gameEnded={phase === "results" || phase === "victory"}
+          reset={resetKey}
         />
       </div>
     </div>
