@@ -2,40 +2,44 @@ import { useEffect, useState } from "react";
 
 // Lines for animated text - each will appear as separate bubble
 const introLines = [
-  "👋 Welcome to UCI's Petr Run!",
-  "This tradition began in Fall 2018, when a mysterious student, petr_the_anteatr, placed the first sticker near Aldrich Park.",
-  "Students quickly discovered these stickers were part of a campus-wide game, and the hype spread fast.",
-  "They're hidden in unexpected spots all around campus, from Ring Road to the Student Center.",
-  "To claim one, you have to *literally run* to the drop location: because once they're gone, they're gone!",
+  "👋 Welcome to UCI's Petr Run! A petr is a cartoon drawing of UCI's mascot, Peter the Anteater.",
+  "The Petr Run tradition began in Fall 2018, when a mysterious student, petr_the_anteatr, placed the first sticker near Aldrich Park.",
+  "Petr stickers are hidden in unexpected spots all around campus, from Ring Road to the Student Center.",
+  "To claim one, you have to LITERALLY run to the drop location: because once they're gone, they're gone!",
   "Each sticker is limited, designed by UCI students, and part of an ever growing collectible set.",
+  "Students quickly discovered these stickers were part of a campus wide game, and the hype spread fast.",
   "Now, when a drop is announced on Instagram, hundreds of students instantly bolt across campus!",
   "Some fans have collected over 700 stickers. Yes, seven hundred!",
   "It's wild. It's sweaty. It's hundreds of students full sprinting through campus screaming for stickers. UCI spirit at its peak.",
-  "Ready to join the run? 🏃‍♂️ Tap 'Start Game' or explore the UCI Map Demo first!"
+  "Ready to join the run? 🏃‍♂️"
 ];
 
 export default function App() {
   const [gameStarted, setGameStarted] = useState(false);
   const [currentLine, setCurrentLine] = useState(0);
 
-  useEffect(() => {
-    if (!gameStarted) return;
+useEffect(() => {
+  if (!gameStarted) return;
 
-    if (currentLine < introLines.length) {
-      const timeout = setTimeout(() => {
-        setCurrentLine(currentLine + 1);
-      }, 5000);
-      return () => clearTimeout(timeout);
-    }
-  }, [currentLine, gameStarted]);
+  if (currentLine < introLines.length) {
+    const delay = currentLine === 0 ? 900 : 5800; // 1.5s for first, 5s for others
+    const timeout = setTimeout(() => {
+      setCurrentLine(currentLine + 1);
+    }, delay);
+    return () => clearTimeout(timeout);
+  }
+}, [currentLine, gameStarted]);
+
 
   const handleStartGame = () => {
     setGameStarted(true);
   };
 
   const handleSkipTutorial = () => {
-    console.log("Skipping tutorial...");
+    setGameStarted(true);
+    setCurrentLine(introLines.length); // Skip to end of tutorial
   };
+
 
   if (!gameStarted) {
     return (
@@ -44,7 +48,7 @@ export default function App() {
         <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
 
         {/* Petr sticker - shifted right */}
-        <div className="absolute left-[60%] top-[55%] -translate-y-1/2 h-[50vh] w-[35vw] min-w-[260px] max-w-[380px] flex items-center justify-center z-10 pointer-events-none select-none">
+        <div className="absolute left-[60%] top-[59%] -translate-y-1/2 h-[50vh] w-[35vw] min-w-[260px] max-w-[380px] flex items-center justify-center z-10 pointer-events-none select-none">
           <img
             src="/stickers/Github-petr-dark.png"
             alt="Petr Sticker"
@@ -107,27 +111,44 @@ export default function App() {
       </div>
 
       {/* Dialog bubble */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 max-w-4xl w-[min(95vw,800px)] z-20">
-        {currentLine > 0 && (
-          <div className="relative">
-            <div className="rounded-xl shadow-2xl bg-gray-900/95 backdrop-blur-xl border-2 border-blue-500/30 px-8 py-6 text-white">
-              <div className="absolute -top-4 left-6 bg-blue-600 px-4 py-1 rounded-full text-sm font-bold border-2 border-blue-400">
-                Petr the Anteater
+{/* Dialog bubble */}
+<div className="absolute bottom-8 left-1/2 -translate-x-[35%] max-w-4xl w-[min(95vw,800px)] z-20">
+  {currentLine > 0 && (
+    <div className="relative">
+      <div className="rounded-xl shadow-2xl bg-gray-900/95 backdrop-blur-xl border-2 border-blue-500/30 px-8 py-6 text-white">
+        <div className="absolute -top-4 left-6 bg-blue-600 px-4 py-1 rounded-full text-sm font-bold border-2 border-blue-400">
+          Petr the Anteater
+        </div>
+        <div className="text-xl sm:text-2xl font-medium leading-relaxed animate-fadeInUp pt-2">
+          <>
+            {currentLine === introLines.length ? (
+              <div className="flex flex-wrap justify-between items-center gap-4">
+                <span>Ready to join the run? 🏃‍♂️</span>
+                <button
+                  onClick={() => console.log("Start Game clicked!")}
+                  className="px-6 py-3 text-lg sm:text-xl font-semibold rounded-xl bg-blue-400 text-white shadow-md hover:scale-105 transition-transform duration-200"
+                >
+                  🚀 Start Game
+                </button>
               </div>
-              <div className="text-xl sm:text-2xl font-medium leading-relaxed animate-fadeInUp pt-2">
-                {introLines[currentLine - 1]}
-              </div>
-              {currentLine < introLines.length && (
-                <div className="flex items-center gap-1 mt-4 opacity-60">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-150" />
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-300" />
-                </div>
-              )}
-            </div>
+            ) : (
+              introLines[currentLine - 1]
+            )}
+
+          </>
+        </div>
+        {currentLine < introLines.length && (
+          <div className="flex items-center gap-1 mt-4 opacity-60">
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-150" />
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-300" />
           </div>
         )}
       </div>
+    </div>
+  )}
+</div>
+
 
       {/* Skip tutorial */}
       <div className="absolute top-8 right-8 z-40">
