@@ -44,6 +44,9 @@ useEffect(() => {
 
   if (!gameStarted) {
     return (
+      <>
+      <audio src="/Elevator-music.mp3" controls autoPlay loop />
+
       <main className="relative flex h-screen w-screen bg-black overflow-hidden">
         {/* Background grid pattern */}
         <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
@@ -93,11 +96,18 @@ useEffect(() => {
           <div className="absolute right-1/3 bottom-1/3 w-1.5 h-1.5 bg-yellow-400/40 rounded-full animate-pulse delay-3000" />
         </div>
       </main>
+      </>
     );
   }
 
   return (
-    <main className="relative flex h-screen w-screen bg-black overflow-hidden">
+          <>
+      <audio src="/Elevator-music.mp3" controls autoPlay loop />
+    <main
+  className="relative flex h-screen w-screen bg-cover bg-center overflow-hidden"
+  style={{ backgroundImage: "url('/UCI_map.png')" }}
+>
+
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
 
@@ -125,7 +135,6 @@ useEffect(() => {
             {currentLine === introLines.length ? (
               <div className="flex flex-wrap justify-between items-center gap-4">
                 <span>Ready to join the run? 🏃‍♂️</span>
-                
                 <Link
                 to="/game"
                 className="px-6 py-3 text-lg sm:text-xl font-semibold rounded-xl bg-blue-400 text-white shadow-md hover:scale-105 transition-transform duration-200 text-center"
@@ -194,5 +203,6 @@ useEffect(() => {
         `}
       </style>
     </main>
+    </>
   );
 }
