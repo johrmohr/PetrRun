@@ -4,83 +4,124 @@ import { useEffect, useState } from "react";
 const introLines = [
   "👋 Welcome to UCI's Petr Run!",
   "This tradition began in Fall 2018, when a mysterious student, petr_the_anteatr, placed the first sticker near Aldrich Park.",
-  "Now, whenever a drop is announced on Instagram, you'll see hundreds of students drop their bags and sprint across campus!",
-  "Some fans have collected over **700 stickers**—yes, seven hundred!",
-  "It's fast, chaotic, and full of UCI spirit. Expect crowd cheers, late-night dashes, and a whole lot of fun.",
-  "Ready to join the run? 🏃‍♂️"
+  "Students quickly discovered these stickers were part of a campus-wide game, and the hype spread fast.",
+  "They're hidden in unexpected spots all around campus, from Ring Road to the Student Center.",
+  "To claim one, you have to *literally run* to the drop location: because once they're gone, they're gone!",
+  "Each sticker is limited, designed by UCI students, and part of an ever growing collectible set.",
+  "Now, when a drop is announced on Instagram, hundreds of students instantly bolt across campus!",
+  "Some fans have collected over 700 stickers. Yes, seven hundred!",
+  "It's wild. It's sweaty. It's hundreds of students full sprinting through campus screaming for stickers. UCI spirit at its peak.",
+  "Ready to join the run? 🏃‍♂️ Tap 'Start Game' or explore the UCI Map Demo first!"
 ];
 
 export default function App() {
+  const [gameStarted, setGameStarted] = useState(false);
   const [currentLine, setCurrentLine] = useState(0);
-  const [showButtons, setShowButtons] = useState(false);
 
-  // Show lines one by one with timing
   useEffect(() => {
+    if (!gameStarted) return;
+
     if (currentLine < introLines.length) {
       const timeout = setTimeout(() => {
         setCurrentLine(currentLine + 1);
-      }, 2800); // Slower timing for better readability
+      }, 5000);
       return () => clearTimeout(timeout);
-    } else {
-      // Show buttons after all text is done
-      const buttonTimeout = setTimeout(() => setShowButtons(true), 800);
-      return () => clearTimeout(buttonTimeout);
     }
-  }, [currentLine]);
+  }, [currentLine, gameStarted]);
 
   const handleStartGame = () => {
-    console.log("Starting game...");
-    // Add your game start logic here
-  };
-
-  const handleMapDemo = () => {
-    console.log("Opening map demo...");
-    // Add your map demo logic here
+    setGameStarted(true);
   };
 
   const handleSkipTutorial = () => {
     console.log("Skipping tutorial...");
-    // Add your skip tutorial logic here
   };
+
+  if (!gameStarted) {
+    return (
+      <main className="relative flex h-screen w-screen bg-black overflow-hidden">
+        {/* Background grid pattern */}
+        <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
+
+        {/* Petr sticker - shifted right */}
+        <div className="absolute left-[60%] top-[55%] -translate-y-1/2 h-[50vh] w-[35vw] min-w-[260px] max-w-[380px] flex items-center justify-center z-10 pointer-events-none select-none">
+          <img
+            src="/stickers/Github-petr-dark.png"
+            alt="Petr Sticker"
+            className="w-full h-full object-contain rounded-full"
+          />
+        </div>
+
+        {/* Welcome text - moved further up */}
+         <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20">
+          <h1 className="text-6xl sm:text-7xl md:text-8xl font-bold text-white mb-8 animate-fadeInUp leading-tight">
+          
+
+            <span className="whitespace-nowrap bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent block">
+              Welcome to UCI's
+            </span>
+            <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent block mt-2">
+              Petr Run
+            </span>
+          </h1>
+          </div>
+
+
+
+        {/* Start button */}
+        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 z-30">
+          <button
+            onClick={handleStartGame}
+            className="group px-12 py-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-3xl font-bold rounded-2xl shadow-2xl hover:shadow-blue-500/30 hover:scale-110 transition-all duration-300 border-2 border-blue-400/30 hover:from-blue-500 hover:to-purple-500 animate-pulse"
+          >
+            <span className="flex items-center justify-center gap-4">
+              🎮 <span>Click to Start</span> ✨
+            </span>
+          </button>
+        </div>
+
+        {/* Ambient dots */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute left-16 top-16 w-3 h-3 bg-blue-400/40 rounded-full animate-pulse" />
+          <div className="absolute right-20 top-1/3 w-2 h-2 bg-purple-400/50 rounded-full animate-pulse delay-1000" />
+          <div className="absolute left-1/4 bottom-20 w-2.5 h-2.5 bg-cyan-400/30 rounded-full animate-pulse delay-2000" />
+          <div className="absolute right-1/3 bottom-1/3 w-1.5 h-1.5 bg-yellow-400/40 rounded-full animate-pulse delay-3000" />
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative flex h-screen w-screen bg-black overflow-hidden">
-      {/* Subtle grid pattern overlay */}
+      {/* Background pattern */}
       <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
-      
-      {/* Petr character - game style positioning */}
+
+      {/* Petr sticker in-game */}
       <div className="absolute left-8 bottom-0 h-[70vh] w-[35vw] min-w-[300px] max-w-[450px] flex items-end z-10 pointer-events-none select-none">
         <img
-          src="/stickers/Thanos.png"
-          alt="Petr the Anteater"
-          className="w-full h-full object-cover object-bottom drop-shadow-2xl filter brightness-110 contrast-110"
+          src="/stickers/Github-petr-dark.png"
+          alt="Petr Sticker"
+          className="w-full h-full object-contain rounded-full"
           style={{ transform: "translateY(20%)" }}
-          draggable={false}
         />
       </div>
 
-      {/* Speech bubbles - game dialog style at bottom */}
+      {/* Dialog bubble */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 max-w-4xl w-[min(95vw,800px)] z-20">
         {currentLine > 0 && (
           <div className="relative">
-            {/* Game-style dialog box */}
             <div className="rounded-xl shadow-2xl bg-gray-900/95 backdrop-blur-xl border-2 border-blue-500/30 px-8 py-6 text-white">
-              {/* Character name tag */}
               <div className="absolute -top-4 left-6 bg-blue-600 px-4 py-1 rounded-full text-sm font-bold border-2 border-blue-400">
                 Petr the Anteater
               </div>
-              
-              {/* Dialog text */}
               <div className="text-xl sm:text-2xl font-medium leading-relaxed animate-fadeInUp pt-2">
                 {introLines[currentLine - 1]}
               </div>
-              
-              {/* Typing indicator if not last message */}
               {currentLine < introLines.length && (
                 <div className="flex items-center gap-1 mt-4 opacity-60">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-150"></div>
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-300"></div>
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-150" />
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-300" />
                 </div>
               )}
             </div>
@@ -88,7 +129,7 @@ export default function App() {
         )}
       </div>
 
-      {/* Skip Tutorial - always visible */}
+      {/* Skip tutorial */}
       <div className="absolute top-8 right-8 z-40">
         <button
           onClick={handleSkipTutorial}
@@ -98,70 +139,31 @@ export default function App() {
         </button>
       </div>
 
-      {/* Main action buttons - appear only after all text */}
-      {showButtons && (
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-6 items-center z-30 animate-slideInDown">
-          <button
-            onClick={handleStartGame}
-            className="group px-10 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-2xl font-bold rounded-xl shadow-xl hover:shadow-blue-500/25 hover:scale-105 transition-all duration-300 border border-blue-500/30 hover:from-blue-500 hover:to-blue-600"
-          >
-            <span className="flex items-center justify-center gap-3">
-              🎮 <span>Start Game</span>
-            </span>
-          </button>
-          
-          <button
-            onClick={handleMapDemo}
-            className="group px-10 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-2xl font-bold rounded-xl shadow-xl hover:shadow-emerald-500/25 hover:scale-105 transition-all duration-300 border border-emerald-500/30 hover:from-emerald-500 hover:to-emerald-600"
-          >
-            <span className="flex items-center justify-center gap-3">
-              🗺️ <span>Map Demo</span>
-            </span>
-          </button>
-        </div>
-      )}
-
-      {/* Floating ambient elements */}
+      {/* Ambient dots */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute left-16 top-16 w-2 h-2 bg-blue-400/30 rounded-full animate-pulse" />
         <div className="absolute right-20 top-1/3 w-1 h-1 bg-purple-400/40 rounded-full animate-pulse delay-1000" />
         <div className="absolute left-1/4 bottom-20 w-1.5 h-1.5 bg-cyan-400/20 rounded-full animate-pulse delay-2000" />
       </div>
 
-      {/* Custom animations */}
+      {/* Animations */}
       <style>
         {`
           @keyframes fadeInUp {
-            from { 
-              opacity: 0; 
+            from {
+              opacity: 0;
               transform: translateY(20px);
             }
-            to { 
-              opacity: 1; 
+            to {
+              opacity: 1;
               transform: translateY(0);
             }
           }
-          
-          @keyframes slideInRight {
-            from { 
-              opacity: 0; 
-              transform: translateX(40px);
-            }
-            to { 
-              opacity: 1; 
-              transform: translateX(0);
-            }
-          }
-          
+
           .animate-fadeInUp {
             animation: fadeInUp 0.8s ease-out forwards;
           }
-          
-          .animate-slideInRight {
-            animation: slideInRight 0.6s ease-out forwards;
-          }
-          
-          /* Smooth hover effects */
+
           .group:hover {
             transform: translateY(-2px);
           }
