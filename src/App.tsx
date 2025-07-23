@@ -32,9 +32,15 @@ useEffect(() => {
 }, [currentLine, gameStarted]);
 
 
-  const handleStartGame = () => {
-    setGameStarted(true);
-  };
+const handleStartGame = () => {
+  const audio = document.getElementById("bg-music");
+  if (audio) {
+    audio.muted = false;
+    audio.play();
+  }
+  setGameStarted(true);
+};
+
 
   const handleSkipTutorial = () => {
     setGameStarted(true);
@@ -45,7 +51,8 @@ useEffect(() => {
   if (!gameStarted) {
     return (
       <>
-      <audio src="/Elevator-music.mp3" controls autoPlay loop />
+      <audio id="bg-music" src="/Elevator-music.mp3" autoPlay loop muted/>
+      <audio src="/Elevator-music.mp3" autoPlay loop />
 
       <main className="relative flex h-screen w-screen bg-black overflow-hidden">
         {/* Background grid pattern */}
@@ -102,7 +109,7 @@ useEffect(() => {
 
   return (
           <>
-      <audio src="/Elevator-music.mp3" controls autoPlay loop />
+      <audio id="bg-music" src="/Elevator-music.mp3" autoPlay loop muted />
     <main
   className="relative flex h-screen w-screen bg-cover bg-center overflow-hidden"
   style={{ backgroundImage: "url('/UCI_map.png')" }}
