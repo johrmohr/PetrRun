@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 models/
+combined_map_reduced.png
+bigMap.png
