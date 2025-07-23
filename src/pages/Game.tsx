@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import GameMap from "../components/GameMap";
+import ImagePreloader from "../components/ImagePreloader";
 import { GAME_CONFIG, DROPSITES, DROP_RADIUS } from "../utils/constants";
 import type { Dropsite } from "../utils/types";
 
@@ -98,7 +99,9 @@ export default function Game() {
 
   // UI rendering by phase
   return (
-    <div className="relative w-full h-screen flex flex-col items-center justify-center bg-gray-100">
+    <ImagePreloader imageSrc="/UCI_map.png">
+      {(imageDimensions) => (
+        <div className="relative w-full h-screen flex flex-col items-center justify-center bg-gray-100">
       {phase === "start" && (
         <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-white bg-opacity-90 p-6 rounded-lg shadow-xl text-center">
           <h2 className="text-2xl font-bold mb-2 text-gray-800">Pick your starting point!</h2>
@@ -166,6 +169,7 @@ export default function Game() {
           center={playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER}
           zoom={18}
           playerPosition={playerPos || undefined}
+          imageDimensions={imageDimensions}
           markers={
             phase !== "start"
               ? [
@@ -183,5 +187,7 @@ export default function Game() {
         />
       </div>
     </div>
+      )}
+    </ImagePreloader>
   );
 }
