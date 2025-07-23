@@ -37,12 +37,6 @@ function App() {
             >
               🎮 Start Game
             </Link>
-            <Link
-              to="/game-demo"
-              className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-center"
-            >
-              🗺️ Map Demo
-            </Link>
           </div>
         </section>
       </div>
