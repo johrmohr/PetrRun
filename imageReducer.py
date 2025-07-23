@@ -123,27 +123,31 @@ def find_content_bounds_parallel(
     return top, bottom, left, right
 
 
-def find_bounds_chunked(img: Image.Image, chunk_size: int = 2048) -> Optional[Tuple[int, int, int, int]]:
+def find_bounds_chunked(
+    img: Image.Image, chunk_size: int = 2048
+) -> Optional[Tuple[int, int, int, int]]:
     """Find content bounds by scanning image in chunks to save memory"""
     width, height = img.size
-    
+
     # Sample points across the image to find rough bounds
     sample_points = []
     step = max(1, min(width, height) // 20)  # Sample ~20 points per dimension
-    
+
     print(f"🔍 Sampling image with step size {step}...")
-    
+
     # Sample horizontal strips
     for y in range(0, height, step):
         for x in range(0, width, min(chunk_size, width)):
             x_end = min(x + chunk_size, width)
             chunk = img.crop((x, y, x_end, min(y + step, height)))
-            
+
             if chunk.mode != "RGBA":
                 chunk = chunk.convert("RGBA")
-            
-            chunk_array = np.array(chunk, dtype=np.uint8)  # Use np.array to make it writable
-            
+
+            chunk_array = np.array(
+                chunk, dtype=np.uint8
+            )  # Use np.array to make it writable
+
             # Check for content in this chunk
             if chunk_array.shape[2] == 4:
                 alpha_channel = chunk_array[:, :, 3]
@@ -153,21 +157,21 @@ def find_bounds_chunked(img: Image.Image, chunk_size: int = 2048) -> Optional[Tu
                 has_content = np.any(non_transparent & not_white)
             else:
                 has_content = np.any(chunk_array < 240)
-            
+
             if has_content:
                 sample_points.append((x, y, x_end - 1, min(y + step - 1, height - 1)))
-    
+
     if not sample_points:
         return None
-    
+
     # Find overall bounds from sample points
     min_x = min(p[0] for p in sample_points)
     min_y = min(p[1] for p in sample_points)
     max_x = max(p[2] for p in sample_points)
     max_y = max(p[3] for p in sample_points)
-    
+
     print(f"📦 Rough bounds found: ({min_x}, {min_y}) to ({max_x}, {max_y})")
-    
+
     return min_x, min_y, max_x, max_y
 
 
@@ -192,54 +196,60 @@ def reduce_image_whitespace(
         width, height = original_size
 
         print(f"Processing huge image of size {original_size} in chunks...")
-        
+
         # For very large images, find bounds by scanning in smaller chunks
         if width * height > 100_000_000:  # > 100M pixels
             print("🔍 Scanning for content bounds in chunks to save memory...")
-            
+
             # Find rough bounds by sampling
             bounds = find_bounds_chunked(img, chunk_size)
-            
+
             if bounds is None:
                 print("No content found in image")
                 return
-            
+
             left, top, right, bottom = bounds
-            print(f"📦 Content bounds: left={left}, top={top}, right={right}, bottom={bottom}")
-            
+            print(
+                f"📦 Content bounds: left={left}, top={top}, right={right}, bottom={bottom}"
+            )
+
             # Crop the region we actually need
             content_width = right - left + 1
             content_height = bottom - top + 1
-            
+
             print(f"🎯 Cropping to content area: {content_width} x {content_height}")
-            
+
             # Create output image with clean background
-            output_img = Image.new("RGBA", (content_width, content_height), background_color)
-            
+            output_img = Image.new(
+                "RGBA", (content_width, content_height), background_color
+            )
+
             # Process the content area in chunks
             chunk_rows = max(1, chunk_size)
             chunk_cols = max(1, chunk_size)
-            
+
             for y in range(0, content_height, chunk_rows):
                 for x in range(0, content_width, chunk_cols):
                     chunk_right = min(x + chunk_cols, content_width)
                     chunk_bottom = min(y + chunk_rows, content_height)
-                    
+
                     # Calculate absolute coordinates
                     abs_left = left + x
                     abs_top = top + y
                     abs_right = left + chunk_right
                     abs_bottom = top + chunk_bottom
-                    
+
                     # Load only this chunk
                     chunk = img.crop((abs_left, abs_top, abs_right, abs_bottom))
-                    
+
                     # Clean the chunk
                     if chunk.mode != "RGBA":
                         chunk = chunk.convert("RGBA")
-                    
-                    chunk_array = np.array(chunk, dtype=np.uint8)  # Use np.array to make it writable
-                    
+
+                    chunk_array = np.array(
+                        chunk, dtype=np.uint8
+                    )  # Use np.array to make it writable
+
                     # Create content mask for this chunk
                     if chunk_array.shape[2] == 4:
                         alpha_channel = chunk_array[:, :, 3]
@@ -249,43 +259,47 @@ def reduce_image_whitespace(
                         content_mask = non_transparent & not_white
                     else:
                         content_mask = np.any(chunk_array < 240, axis=2)
-                    
+
                     # Clean background in chunk
                     chunk_array[~content_mask] = background_color
-                    
+
                     # Convert back and paste into output
                     cleaned_chunk = Image.fromarray(chunk_array, "RGBA")
                     output_img.paste(cleaned_chunk, (x, y))
-                    
-                    print(f"📦 Processed chunk ({x}, {y}) to ({chunk_right}, {chunk_bottom})")
-            
+
+                    print(
+                        f"📦 Processed chunk ({x}, {y}) to ({chunk_right}, {chunk_bottom})"
+                    )
+
             final_img = output_img
-            
+
         else:
             # For smaller images, use the original method
             if img.mode != "RGBA":
                 img = img.convert("RGBA")
-            
-            img_array = np.array(img, dtype=np.uint8)  # Use np.array to make it writable
+
+            img_array = np.array(
+                img, dtype=np.uint8
+            )  # Use np.array to make it writable
             bounds = find_content_bounds_parallel(img_array, num_threads)
-            
+
             if bounds is None:
                 print("No content found in image")
                 return
-            
+
             top, bottom, left, right = bounds
             cleaned_array = img_array.copy()
-            
+
             # Create content mask
             alpha_channel = img_array[:, :, 3]
             rgb_channels = img_array[:, :, :3]
             non_transparent = alpha_channel > 10
             not_white = np.any(rgb_channels < 240, axis=2)
             content_mask = non_transparent & not_white
-            
+
             # Set background to specified color
             cleaned_array[~content_mask] = background_color
-            
+
             # Convert back to PIL Image and crop
             cleaned_img = Image.fromarray(cleaned_array, "RGBA")
             final_img = cleaned_img.crop((left, top, right + 1, bottom + 1))
