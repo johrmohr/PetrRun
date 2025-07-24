@@ -8,7 +8,6 @@ const stickerUrls = [
   "/stickers/Superhero-petr.png",
   "/stickers/Pumpkin-petr.png",
   "/stickers/Alien.png",
-  // "/stickers/Study-petr.png"
 ];
 
 
