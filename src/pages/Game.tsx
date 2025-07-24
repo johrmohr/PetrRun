@@ -1,65 +1,27 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import InteractiveMap from "../game/components/InteractiveMap";
+import { useState, useRef, useEffect } from "react";
+import GameMap from "../components/GameMap";
 import ImagePreloader from "../components/ImagePreloader";
 import { DROPSITES, DROP_RADIUS } from "../utils/constants";
-import { spawnItemNearPlayer } from "../game/utils/mapUtils";
 import type { Dropsite } from "../utils/types";
 
 // Game states
 type GamePhase = "start" | "countdown" | "reveal" | "playing" | "victory" | "results";
 
-// Inner component that has access to imageDimensions
-const GameContent: React.FC<{
-  imageDimensions: { width: number; height: number };
-}> = ({ imageDimensions }) => {
+// Function to select a random dropsite
+const selectRandomDropsite = (): Dropsite => {
+  const randomIndex = Math.floor(Math.random() * DROPSITES.length);
+  return DROPSITES[randomIndex];
+};
+
+export default function Game() {
   // State
   const [phase, setPhase] = useState<GamePhase>("start");
   const [playerPos, setPlayerPos] = useState<[number, number] | null>(null);
-  const [currentDropsite, setCurrentDropsite] = useState<Dropsite | null>(null);
-  const [dropPosition, setDropPosition] = useState<[number, number] | null>(null);
+  const [currentDropsite, setCurrentDropsite] = useState<Dropsite>(() => selectRandomDropsite());
   const [timer, setTimer] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(3);
-  const [imageData, setImageData] = useState<ImageData | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Handle map image data loaded
-  const handleMapImageDataLoaded = (data: ImageData | null) => {
-    setImageData(data);
-  };
-
-  // Function to spawn a new dropsite near the player
-  const spawnNewDropsite = useCallback((playerPosition: [number, number], imageDims: { width: number; height: number }) => {
-    const randomDropsite = DROPSITES[Math.floor(Math.random() * DROPSITES.length)];
-    
-    if (imageData) {
-      const spawnedPosition = spawnItemNearPlayer(
-        playerPosition,
-        imageDims,
-        800, // spawn radius in pixels
-        imageData
-      );
-      
-      if (spawnedPosition) {
-        setCurrentDropsite(randomDropsite);
-        setDropPosition(spawnedPosition);
-        console.log(`Spawned dropsite "${randomDropsite.name}" at:`, spawnedPosition, `Player at:`, playerPosition);
-        return;
-      }
-    }
-    
-    // Fallback to original dropsite location if spawning fails
-    setCurrentDropsite(randomDropsite);
-    setDropPosition(randomDropsite.location);
-    console.log(`Fallback: Using original dropsite location for "${randomDropsite.name}":`, randomDropsite.location);
-  }, [imageData]);
-
-  // When player position is set and image data is available, spawn dropsite
-  useEffect(() => {
-    if (playerPos && imageData && !currentDropsite) {
-      spawnNewDropsite(playerPos, imageDimensions);
-    }
-  }, [playerPos, imageData, currentDropsite, spawnNewDropsite, imageDimensions]);
 
   // Start selection: player clicks map to set start
   const handleMapClick = (position: { x: number; y: number }) => {
@@ -104,19 +66,17 @@ const GameContent: React.FC<{
     }
   }, [phase, startTime]);
 
-  // WASD movement handler (delegated to InteractiveMap)
+  // WASD movement handler (delegated to GameMap)
   const handlePlayerMove = (newPos: [number, number]) => {
     setPlayerPos(newPos);
-    // Check victory using dropPosition (the actual spawned position)
-    if (dropPosition) {
-      const distance = Math.sqrt(
-        Math.pow(newPos[0] - dropPosition[0], 2) + 
-        Math.pow(newPos[1] - dropPosition[1], 2)
-      );
-      
-      if (distance < DROP_RADIUS) {
-        setPhase("victory");
-      }
+    // Check victory using current dropsite location (pixel distance)
+    const distance = Math.sqrt(
+      Math.pow(newPos[0] - currentDropsite.location[0], 2) + 
+      Math.pow(newPos[1] - currentDropsite.location[1], 2)
+    );
+    
+    if (distance < DROP_RADIUS) {
+      setPhase("victory");
     }
   };
 
@@ -133,12 +93,15 @@ const GameContent: React.FC<{
     setPlayerPos(null);
     setTimer(0);
     setStartTime(null);
-    setCurrentDropsite(null);
-    setDropPosition(null);
+    // Select a new random dropsite for the next round
+    setCurrentDropsite(selectRandomDropsite());
   };
 
+  // UI rendering by phase
   return (
-    <div className="relative w-full h-screen flex flex-col items-center justify-center bg-gray-100">
+    <ImagePreloader imageSrc="/UCI_map.png">
+      {(imageDimensions) => (
+        <div className="relative w-full h-screen flex flex-col items-center justify-center bg-gray-100">
       {phase === "start" && (
         <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-white bg-opacity-90 p-6 rounded-lg shadow-xl text-center">
           <h2 className="text-2xl font-bold mb-2 text-gray-800">Pick your starting point!</h2>
@@ -152,7 +115,7 @@ const GameContent: React.FC<{
           </div>
         </div>
       )}
-      {phase === "playing" && currentDropsite && (
+      {phase === "playing" && (
         <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-white bg-opacity-95 p-6 rounded-lg shadow-xl text-center">
           <div className="flex items-center gap-6">
             {/* Photo on the left */}
@@ -182,7 +145,7 @@ const GameContent: React.FC<{
           </div>
         </div>
       )}
-      {phase === "results" && currentDropsite && (
+      {phase === "results" && (
         <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-white bg-opacity-95 p-8 rounded-lg shadow-xl text-center">
           <h2 className="text-2xl font-bold mb-4 text-gray-800">🏆 Results</h2>
           <p className="mb-2 text-lg"><strong className="text-blue-600">{currentDropsite.name}</strong></p>
@@ -202,15 +165,14 @@ const GameContent: React.FC<{
       )}
       {/* Map always visible, but disables controls except in playing phase */}
       <div className="w-full h-full">
-        <InteractiveMap
+        <GameMap
           playerPosition={playerPos || undefined}
           imageDimensions={imageDimensions}
-          onMapImageDataLoaded={handleMapImageDataLoaded}
           markers={
-            phase !== "start" && dropPosition && currentDropsite
+            phase !== "start"
               ? [
                   {
-                    position: dropPosition,
+                    position: currentDropsite.location,
                     popup: `${currentDropsite.name} - Petr Drop!`,
                     color: "#ffa500",
                   },
@@ -222,13 +184,7 @@ const GameContent: React.FC<{
         />
       </div>
     </div>
-  );
-};
-
-export default function Game() {
-  return (
-    <ImagePreloader imageSrc="/UCI_map.png">
-      {(imageDimensions) => <GameContent imageDimensions={imageDimensions} />}
+      )}
     </ImagePreloader>
   );
 }

@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from "react";
 import GameMapAdapter from "@/game/components/GameMapAdapter";
 import { GAME_CONFIG, SAMPLE_GAME_DATA } from "../utils/constants";
-import { isPlayerNearMarker, spawnMultipleItemsNearPlayer } from "../game/utils/mapUtils";
 import type { GameMarker, Player } from "../utils/types";
 
 const GameDemo: React.FC = () => {
@@ -13,35 +12,28 @@ const GameDemo: React.FC = () => {
     level: 1,
   });
 
-  const [mapImageData, setMapImageData] = useState<ImageData | null>(null);
-
-  const [gameMarkers, setGameMarkers] = useState<GameMarker[]>(() => {
-    // Initialize with base markers
-    const baseMarkers = [
-      ...SAMPLE_GAME_DATA.CHECKPOINTS.map((cp, i) => ({
-        ...cp,
-        type: "checkpoint" as const,
-        id: `checkpoint-${i}`,
-      })),
-      ...SAMPLE_GAME_DATA.TREASURES.map((tr, i) => ({
-        ...tr,
-        type: "treasure" as const,
-        id: `treasure-${i}`,
-      })),
-      ...SAMPLE_GAME_DATA.ENEMIES.map((en, i) => ({
-        ...en,
-        type: "enemy" as const,
-        id: `enemy-${i}`,
-      })),
-      ...SAMPLE_GAME_DATA.OBSTACLES.map((ob, i) => ({
-        ...ob,
-        type: "obstacle" as const,
-        id: `obstacle-${i}`,
-      })),
-    ];
-
-    return baseMarkers; // Start with just base markers, add bonus items when map data loads
-  });
+  const [gameMarkers, setGameMarkers] = useState<GameMarker[]>([
+    ...SAMPLE_GAME_DATA.CHECKPOINTS.map((cp, i) => ({
+      ...cp,
+      type: "checkpoint" as const,
+      id: `checkpoint-${i}`,
+    })),
+    ...SAMPLE_GAME_DATA.TREASURES.map((tr, i) => ({
+      ...tr,
+      type: "treasure" as const,
+      id: `treasure-${i}`,
+    })),
+    ...SAMPLE_GAME_DATA.ENEMIES.map((en, i) => ({
+      ...en,
+      type: "enemy" as const,
+      id: `enemy-${i}`,
+    })),
+    ...SAMPLE_GAME_DATA.OBSTACLES.map((ob, i) => ({
+      ...ob,
+      type: "obstacle" as const,
+      id: `obstacle-${i}`,
+    })),
+  ]);
 
   const [gameSettings, setGameSettings] = useState({
     darkMode: true,
@@ -53,44 +45,6 @@ const GameDemo: React.FC = () => {
     "Game started! Use WASD to move your player.",
   ]);
 
-  // Handle map image data loading
-  const handleMapImageDataLoaded = (imageData: ImageData | null) => {
-    setMapImageData(imageData);
-    
-    // Spawn initial bonus items now that we have map data
-    if (imageData) {
-      setGameMarkers(prevMarkers => {
-        // Check if bonus items already exist
-        const hasBonus = prevMarkers.some(marker => marker.id?.startsWith('starting-bonus'));
-        if (hasBonus) return prevMarkers;
-
-        try {
-          const bonusPositions = spawnMultipleItemsNearPlayer(
-            GAME_CONFIG.MAP.DEFAULT_CENTER,
-            GAME_CONFIG.MAP.MAP_DIMENSIONS,
-            2,
-            200,
-            imageData
-          );
-
-          const bonusItems = bonusPositions.map((pos, i) => ({
-            position: pos,
-            popup: `🎁 Starting Bonus ${i + 1}`,
-            color: "#ff69b4",
-            type: "treasure" as const,
-            id: `starting-bonus-${i}`,
-          }));
-
-          setGameLog(prev => [...prev, "🎁 Bonus items spawned on solid ground near you!"]);
-          return [...prevMarkers, ...bonusItems];
-        } catch (error) {
-          console.warn('Failed to spawn bonus items:', error);
-          return prevMarkers;
-        }
-      });
-    }
-  };
-
   const handlePlayerMove = useCallback(
     (newPosition: [number, number]) => {
       setPlayer((prev) => ({
@@ -98,9 +52,15 @@ const GameDemo: React.FC = () => {
         position: newPosition,
       }));
 
-      // Check for interactions with game objects using the utility function
+      // Check for interactions with game objects
       gameMarkers.forEach((marker) => {
-        if (isPlayerNearMarker(newPosition, marker.position, 50)) {
+        const distance = Math.sqrt(
+          Math.pow(newPosition[0] - marker.position[0], 2) +
+            Math.pow(newPosition[1] - marker.position[1], 2)
+        );
+
+        // If player is very close to a marker (within ~10 meters)
+        if (distance < 0.0001) {
           handleMarkerInteraction(marker);
         }
       });
@@ -161,18 +121,15 @@ const GameDemo: React.FC = () => {
 
 
   const resetGame = () => {
-    const newPlayer = {
+    setPlayer({
       position: GAME_CONFIG.MAP.DEFAULT_CENTER,
       health: 100,
       score: 0,
       inventory: [],
       level: 1,
-    };
+    });
 
-    setPlayer(newPlayer);
-
-    // Generate base markers from sample data
-    const baseMarkers = [
+    setGameMarkers([
       ...SAMPLE_GAME_DATA.CHECKPOINTS.map((cp, i) => ({
         ...cp,
         type: "checkpoint" as const,
@@ -193,38 +150,9 @@ const GameDemo: React.FC = () => {
         type: "obstacle" as const,
         id: `obstacle-${i}`,
       })),
-    ];
+    ]);
 
-    // Spawn additional items near the player using map image data
-    try {
-      const additionalTreasurePositions = spawnMultipleItemsNearPlayer(
-        newPlayer.position,
-        GAME_CONFIG.MAP.MAP_DIMENSIONS,
-        3,
-        250,
-        mapImageData || undefined
-      );
-
-      const additionalTreasures = additionalTreasurePositions.map((pos, i) => ({
-        position: pos,
-        popup: `💎 Bonus Treasure ${i + 1}`,
-        color: "#ffd700",
-        type: "treasure" as const,
-        id: `bonus-treasure-${i}`,
-      }));
-
-      setGameMarkers([...baseMarkers, ...additionalTreasures]);
-      setGameLog([
-        "Game reset! Additional treasures spawned on solid ground near you. Use WASD to move your player.",
-        mapImageData 
-          ? "✅ Using transparency detection for accurate spawning!" 
-          : "⚠️ Spawning without transparency detection - items may appear on water."
-      ]);
-    } catch (error) {
-      console.warn('Failed to spawn additional treasures:', error);
-      setGameMarkers(baseMarkers);
-      setGameLog(["Game reset! Use WASD to move your player."]);
-    }
+    setGameLog(["Game reset! Use WASD to move your player."]);
   };
 
   return (
@@ -249,9 +177,8 @@ const GameDemo: React.FC = () => {
           darkMode={gameSettings.darkMode}
           enable2_5D={gameSettings.enable2_5D}
           gameStyle={gameSettings.gameStyle}
-          imageDimensions={GAME_CONFIG.MAP.MAP_DIMENSIONS}
+
           onPlayerMove={handlePlayerMove}
-          onMapImageDataLoaded={handleMapImageDataLoaded}
         />
       </div>
 
