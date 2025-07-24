@@ -69,9 +69,9 @@ export const GAME_CONFIG = {
     GAME_BOUNDS: undefined, // No bounds for static image
   },
   PLAYER: {
-    SPEED: 100, // pixels per second
+    SPEED: 300, // pixels per second (increased for larger map)
     SIZE: 24,
-    MOVE_DISTANCE: 10, // Movement distance in pixels for WASD
+    MOVE_DISTANCE: 25, // Movement distance in pixels for WASD (increased for larger map)
   },
   MARKERS: {
     CHECKPOINT: {

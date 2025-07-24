@@ -26,8 +26,123 @@ interface GameMapProps {
   imageDimensions: ImageDimensions; // New prop for image dimensions
 }
 
-// WASD Controls Component
+// WASD Controls Component with smooth movement
 function WASDControls({
+  onPlayerMove,
+  playerPosition,
+  mapRef,
+  imageDimensions,
+}: {
+  onPlayerMove?: (newPosition: [number, number]) => void;
+  playerPosition?: [number, number];
+  mapRef: React.RefObject<HTMLDivElement | null>;
+  imageDimensions: ImageDimensions;
+}) {
+  const keysPressed = useRef<Set<string>>(new Set());
+  const animationFrame = useRef<number | null>(null);
+
+  // Store the latest position in a ref to avoid stale closures
+  const currentPosition = useRef(playerPosition);
+  currentPosition.current = playerPosition;
+
+  useEffect(() => {
+    if (!onPlayerMove) return;
+
+    const moveSpeed = 25; // pixels per frame (60fps = ~1500 pixels/second) - increased for responsiveness
+
+    const updatePosition = () => {
+      const currentPos = currentPosition.current;
+      console.log('updatePosition called, currentPos:', currentPos, 'keysPressed:', Array.from(keysPressed.current));
+      
+      if (!currentPos || keysPressed.current.size === 0) {
+        console.log('Stopping animation loop - no position or no keys');
+        animationFrame.current = null;
+        return;
+      }
+
+      let newX = currentPos[0];
+      let newY = currentPos[1];
+
+      // Handle multiple keys simultaneously for diagonal movement
+      if (keysPressed.current.has("w") || keysPressed.current.has("arrowup")) {
+        newY = Math.max(0, newY - moveSpeed);
+      }
+      if (keysPressed.current.has("s") || keysPressed.current.has("arrowdown")) {
+        newY = Math.min(imageDimensions.height, newY + moveSpeed);
+      }
+      if (keysPressed.current.has("a") || keysPressed.current.has("arrowleft")) {
+        newX = Math.max(0, newX - moveSpeed);
+      }
+      if (keysPressed.current.has("d") || keysPressed.current.has("arrowright")) {
+        newX = Math.min(imageDimensions.width, newX + moveSpeed);
+      }
+
+      console.log('Position change:', currentPos, '->', [newX, newY]);
+
+      // Only update if position changed
+      if (newX !== currentPos[0] || newY !== currentPos[1]) {
+        console.log('Calling onPlayerMove with:', [newX, newY]);
+        onPlayerMove([newX, newY]);
+      }
+
+      // Continue animation loop
+      animationFrame.current = requestAnimationFrame(updatePosition);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in input fields
+      if (e.target instanceof HTMLInputElement) return;
+
+      const key = e.key.toLowerCase();
+      if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
+        e.preventDefault();
+        keysPressed.current.add(key);
+        console.log('Key pressed:', key, 'Active keys:', Array.from(keysPressed.current));
+        
+        // Start animation loop if not already running
+        if (!animationFrame.current) {
+          console.log('Starting animation loop');
+          animationFrame.current = requestAnimationFrame(updatePosition);
+        }
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      keysPressed.current.delete(key);
+      // console.log('Key released:', key, 'Active keys:', Array.from(keysPressed.current));
+    };
+
+    // Handle focus loss to stop movement
+    const handleBlur = () => {
+      keysPressed.current.clear();
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current);
+        animationFrame.current = null;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", handleBlur);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", handleBlur);
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current);
+        animationFrame.current = null;
+      }
+    };
+  }, [onPlayerMove, imageDimensions]); // Removed playerPosition from dependencies
+
+  return null;
+}
+
+// Fallback: Simple WASD Controls (uncomment this and comment out the above if needed)
+/*
+function WASDControlsSimple({
   onPlayerMove,
   playerPosition,
   mapRef,
@@ -41,29 +156,37 @@ function WASDControls({
   useEffect(() => {
     if (!onPlayerMove || !playerPosition) return;
 
-    const moveDistance = 10;
+    const moveDistance = 25; // Larger movement for the big map
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in input fields
+      if (e.target instanceof HTMLInputElement) return;
+
       if (!playerPosition || !mapRef.current) return;
 
       let newX = playerPosition[0];
       let newY = playerPosition[1];
 
-      switch (e.key.toLowerCase()) {
+      const key = e.key.toLowerCase();
+      switch (key) {
         case "w":
         case "arrowup":
+          e.preventDefault();
           newY = Math.max(0, newY - moveDistance);
           break;
         case "s":
         case "arrowdown":
+          e.preventDefault();
           newY = Math.min(imageDimensions.height, newY + moveDistance);
           break;
         case "a":
         case "arrowleft":
+          e.preventDefault();
           newX = Math.max(0, newX - moveDistance);
           break;
         case "d":
         case "arrowright":
+          e.preventDefault();
           newX = Math.min(imageDimensions.width, newX + moveDistance);
           break;
         default:
@@ -80,6 +203,7 @@ function WASDControls({
 
   return null;
 }
+*/
 
 const GameMap: React.FC<GameMapProps> = ({
   center = [500, 400], // Default center pixels
@@ -93,6 +217,7 @@ const GameMap: React.FC<GameMapProps> = ({
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
   // Load zoom level from localStorage or use default
   const [zoomLevel, setZoomLevel] = useState(() => {
     const savedZoom = localStorage.getItem('petrrun-zoom-level');
@@ -109,6 +234,12 @@ const GameMap: React.FC<GameMapProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       // Only handle zoom shortcuts when not typing in input fields
       if (e.target instanceof HTMLInputElement) return;
+      
+      // Don't interfere with WASD movement keys
+      const key = e.key.toLowerCase();
+      if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
+        return;
+      }
       
       switch (e.key) {
         case '=':
@@ -134,7 +265,10 @@ const GameMap: React.FC<GameMapProps> = ({
   // Calculate camera transform to follow player
   const getCameraTransform = () => {
     if (!playerPosition || !containerRef.current) {
-      return { transform: `scale(${Math.max(zoomLevel * 0.6, 0.5)})` }; // Minimum zoom when no player
+      return { 
+        transform: `scale(${Math.max(zoomLevel * 0.6, 0.5)})`,
+        transformOrigin: '0 0'
+      }; // Minimum zoom when no player
     }
 
     const containerWidth = containerRef.current.clientWidth;
@@ -147,13 +281,14 @@ const GameMap: React.FC<GameMapProps> = ({
     // Use the zoom level from the slider
     const scale = zoomLevel;
     
-    // Calculate translation to keep player centered (accounting for scale)
+    // Calculate translation to keep player perfectly centered (accounting for scale)
     const translateX = centerX - (playerPosition[0] * scale);
     const translateY = centerY - (playerPosition[1] * scale);
 
     return {
-      transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
-      transformOrigin: '0 0'
+      transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
+      transformOrigin: '0 0',
+      willChange: 'transform', // Optimize for frequent updates
     };
   };
 
@@ -227,7 +362,7 @@ const GameMap: React.FC<GameMapProps> = ({
       {/* Map Container with Camera Transform */}
       <div
         ref={mapRef}
-        className="game-map absolute cursor-crosshair transition-transform duration-200 ease-out"
+        className="game-map absolute cursor-crosshair"
         onClick={handleMapClick}
         style={{
           backgroundImage: "url(/UCI_map.png)",
@@ -236,8 +371,8 @@ const GameMap: React.FC<GameMapProps> = ({
           backgroundPosition: "0 0",
           width: `${imageDimensions.width}px`,
           height: `${imageDimensions.height}px`,
-          willChange: "transform", // Optimize for animations
           backfaceVisibility: "hidden", // Prevent flickering
+          imageRendering: 'auto', // Smooth rendering during movement
           ...getCameraTransform()
         }}
       >
@@ -248,6 +383,7 @@ const GameMap: React.FC<GameMapProps> = ({
             style={{
               left: playerPosition[0] - 32, // Half of 64px width
               top: playerPosition[1] - 32,  // Half of 64px height
+              willChange: 'transform', // Optimize for frequent position changes
             }}
           >
             <img 
@@ -255,7 +391,8 @@ const GameMap: React.FC<GameMapProps> = ({
               alt="Player" 
               className="w-16 h-16 object-contain drop-shadow-lg"
               style={{
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+                imageRendering: 'pixelated', // Crisp rendering during movement
               }}
             />
           </div>
