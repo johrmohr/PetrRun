@@ -11,7 +11,7 @@ export const DROPSITES = [
     id: "space-explorr",
     name: "Space Exploration Center",
     photo: "/stickers/Space-Explorr-Petr.png",
-    location: [800, 600] as [number, number], // Updated for 2000x1600 map
+    location: [2000, 1319] as [number, number], // Scaled from [800, 600] for 5000x3517 map
     difficulty: "medium",
     description: "The iconic space exploration center where Petr dreams of the stars"
   },
@@ -19,7 +19,7 @@ export const DROPSITES = [
     id: "thanos-statue",
     name: "The Purple Monument", 
     photo: "/stickers/Thanos.png",
-    location: [1200, 400] as [number, number], // Updated for 2000x1600 map
+    location: [3000, 879] as [number, number], // Scaled from [1200, 400] for 5000x3517 map
     difficulty: "hard",
     description: "A mysterious purple structure that appeared overnight"
   },
@@ -27,7 +27,7 @@ export const DROPSITES = [
     id: "music-pavilion",
     name: "Trombone Performance Stage",
     photo: "/stickers/Trombone_petr.png", 
-    location: [600, 1000] as [number, number], // Updated for 2000x1600 map
+    location: [1500, 2198] as [number, number], // Scaled from [600, 1000] for 5000x3517 map
     difficulty: "easy",
     description: "Where Petr practices his musical talents"
   },
@@ -35,7 +35,7 @@ export const DROPSITES = [
     id: "aldrich-park",
     name: "Central Park Gazebo",
     photo: "/stickers/Space-Explorr-Petr.png", // Reusing for now
-    location: [1000, 800] as [number, number], // Updated for 2000x1600 map
+    location: [2500, 1758] as [number, number], // Scaled from [1000, 800] for 5000x3517 map
     difficulty: "medium",
     description: "The heart of campus where students gather"
   },
@@ -43,7 +43,7 @@ export const DROPSITES = [
     id: "engineering-tower",
     name: "The Engineering Spire", 
     photo: "/stickers/Thanos.png", // Reusing for now
-    location: [1400, 300] as [number, number], // Updated for 2000x1600 map
+    location: [3500, 659] as [number, number], // Scaled from [1400, 300] for 5000x3517 map
     difficulty: "hard", 
     description: "The tallest structure visible from across campus"
   },
@@ -51,7 +51,7 @@ export const DROPSITES = [
     id: "student-center",
     name: "Student Hub Commons",
     photo: "/stickers/Trombone_petr.png", // Reusing for now
-    location: [700, 1200] as [number, number], // Updated for 2000x1600 map
+    location: [1750, 2638] as [number, number], // Scaled from [700, 1200] for 5000x3517 map
     difficulty: "easy",
     description: "Where Petrs fuel up between classes"
   }
@@ -62,7 +62,7 @@ export const DROP_RADIUS = 100; // Increased for larger map (was 50)
 // Game constants and configuration
 export const GAME_CONFIG = {
   MAP: {
-    DEFAULT_CENTER: [500, 400] as [number, number], // Center of image (assuming ~1000x800 image)
+    DEFAULT_CENTER: [1250, 879] as [number, number], // Scaled center for 5000x3517 image
     DEFAULT_ZOOM: 18, // Not used for static image, kept for compatibility
     MIN_ZOOM: 15,
     MAX_ZOOM: 20,

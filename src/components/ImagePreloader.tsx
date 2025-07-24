@@ -21,9 +21,9 @@ const ImagePreloader: React.FC<ImagePreloaderProps> = ({
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState<ImageDimensions>({
-    width: 2000,
-    height: 1600,
-    aspectRatio: 1.25
+    width: 5000,   // Updated to actual current image dimensions
+    height: 3517,  // Updated to actual current image dimensions
+    aspectRatio: 5000 / 3517  // Updated aspect ratio
   });
 
   useEffect(() => {
@@ -62,11 +62,11 @@ const ImagePreloader: React.FC<ImagePreloaderProps> = ({
       clearInterval(loadingInterval);
       setError('Failed to load map image. Please refresh and try again.');
       
-      // Set fallback dimensions for UCI map
+      // Set fallback dimensions for UCI map (updated to current image size)
       setDimensions({
-        width: 2000,
-        height: 1600,
-        aspectRatio: 2000 / 1600
+        width: 5000,
+        height: 3517,
+        aspectRatio: 5000 / 3517
       });
     };
 

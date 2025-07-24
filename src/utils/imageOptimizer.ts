@@ -58,8 +58,8 @@ export const imageCache = new ImageCache();
 
 // Constants for map optimization
 export const MAP_CONFIG = {
-  ORIGINAL_WIDTH: 2000,
-  ORIGINAL_HEIGHT: 1600,
+  ORIGINAL_WIDTH: 5000,  // Updated to actual current image dimensions
+  ORIGINAL_HEIGHT: 3517, // Updated to actual current image dimensions
   TILE_SIZE: 256,
   MAX_ZOOM: 2.5,
   MIN_ZOOM: 0.5,
