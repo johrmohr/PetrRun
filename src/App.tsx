@@ -22,6 +22,26 @@ export default function App() {
   const [displayedText, setDisplayedText] = useState("");
   const [charIndex, setCharIndex] = useState(0);
 
+useEffect(() => {
+  const audio = document.getElementById("bg-music") as HTMLAudioElement | null;
+
+  if (audio) {
+    audio.muted = false;
+    audio.volume = 0;
+
+    let volume = 0;
+    const interval = setInterval(() => {
+      if (volume < 0.3) {
+        volume += 0.02;
+        audio.volume = volume;
+      } else {
+        clearInterval(interval);
+      }
+    }, 150);
+
+    return () => clearInterval(interval);
+  }
+}, []); // empty dependency — runs only once
 
 useEffect(() => {
   if (!gameStarted) return;
@@ -47,6 +67,7 @@ useEffect(() => {
 }, [charIndex, currentLine, gameStarted]);
 
 
+
 const handleStartGame = () => {
   const audio = document.getElementById("bg-music") as HTMLAudioElement | null;
   if (audio) {
@@ -65,7 +86,15 @@ const handleStartGame = () => {
   if (!gameStarted) {
     return (
       <>
-      <audio id="bg-music" src="/Elevator-music.mp3" autoPlay loop muted/>
+      <audio
+  id="bg-music"
+  src="/Elevator-music.mp3"
+  autoPlay
+  loop
+  muted
+  style={{ display: "none" }}
+/>
+
 
       <main className="relative flex h-screen w-screen bg-black overflow-hidden">
         {/* Background grid pattern */}
@@ -122,7 +151,15 @@ const handleStartGame = () => {
 
   return (
           <>
-      <audio id="bg-music" src="/Elevator-music.mp3" autoPlay loop muted />
+      <audio
+  id="bg-music"
+  src="/Elevator-music.mp3"
+  autoPlay
+  loop
+  muted
+  style={{ display: "none" }}
+/>
+
     <main
   className="relative flex h-screen w-screen bg-cover bg-center overflow-hidden"
   style={{ backgroundImage: "url('/UCI_map.png')" }}
@@ -154,7 +191,7 @@ const handleStartGame = () => {
           {currentLine === introLines.length ? (
             <div className="flex items-center gap-3">
               <span className="text-white text-base sm:text-lg md:text-xl font-semibold">
-                
+                Ready to join the run? 🏃‍♂️
               </span>
               <Link
                 to="/game"
