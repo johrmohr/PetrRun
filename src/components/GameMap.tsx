@@ -262,7 +262,7 @@ const GameMap: React.FC<GameMapProps> = ({
         
         setTimeout(() => {
           console.log('🔍 Step 3: Returning to original zoom', originalZoom);
-          setZoomLevel(originalZoom);
+          setZoomLevel(0.7);
           console.log('✅ Auto-center fix complete!');
         }, 50);
       }, 50);
@@ -356,37 +356,47 @@ const GameMap: React.FC<GameMapProps> = ({
     };
   };
 
-  // Handle map clicks (adjust for zoom and translation)
+  // Handle map clicks (adjust for zoom and translation) - using exact same logic as getCameraTransform
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!onMapClick || !mapRef.current || !containerRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
-    const scale = playerPosition ? zoomLevel : Math.max(zoomLevel * 0.6, 0.5); // Use current zoom level
     
     // Get click position relative to container
     const containerX = e.clientX - rect.left;
     const containerY = e.clientY - rect.top;
 
-    // Calculate actual map position accounting for zoom and translation
+    const containerWidth = containerRef.current.clientWidth;
+    const containerHeight = containerRef.current.clientHeight;
+    const centerX = containerWidth / 2;
+    const centerY = containerHeight / 2;
+    const scale = zoomLevel; // Use exact same scale as camera transform
+    
+    // Calculate actual map position using EXACT same logic as getCameraTransform (but reversed)
     let mapX, mapY;
     
-    if (playerPosition) {
-      const centerX = containerRef.current.clientWidth / 2;
-      const centerY = containerRef.current.clientHeight / 2;
-      
-      const translateX = centerX - (playerPosition[0] * scale);
-      const translateY = centerY - (playerPosition[1] * scale);
-      
+    if (gamePhase === "countdown") {
+      // During countdown, camera centers on specified center point
+      const translateX = centerX - (center[0] * scale);
+      const translateY = centerY - (center[1] * scale);
       mapX = (containerX - translateX) / scale;
       mapY = (containerY - translateY) / scale;
-          } else {
-        // No player position, just account for scale
-        const centerX = containerRef.current.clientWidth / 2;
-        const centerY = containerRef.current.clientHeight / 2;
-        mapX = (containerX - centerX) / scale + imageDimensions.width / 2;
-        mapY = (containerY - centerY) / scale + imageDimensions.height / 2;
-      }
+    } else if (playerPosition && gamePhase === "playing") {
+      // During playing, camera follows player
+      const translateX = centerX - (playerPosition[0] * scale);
+      const translateY = centerY - (playerPosition[1] * scale);
+      mapX = (containerX - translateX) / scale;
+      mapY = (containerY - translateY) / scale;
+    } else {
+      // Default behavior: use target position (player or center)
+      const targetPosition = playerPosition || center;
+      const translateX = centerX - (targetPosition[0] * scale);
+      const translateY = centerY - (targetPosition[1] * scale);
+      mapX = (containerX - translateX) / scale;
+      mapY = (containerY - translateY) / scale;
+    }
 
+    console.log('🖱️ Click at screen:', containerX, containerY, '→ Map:', mapX, mapY, '(scale:', scale, ')');
     onMapClick({ x: mapX, y: mapY });
   };
 
