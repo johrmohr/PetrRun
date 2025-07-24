@@ -62,7 +62,7 @@ export const DROP_RADIUS = 100; // Increased for larger map (was 50)
 // Game constants and configuration
 export const GAME_CONFIG = {
   MAP: {
-    DEFAULT_CENTER: [1250, 879] as [number, number], // Scaled center for 5000x3517 image
+    DEFAULT_CENTER: [2500, 1758] as [number, number], // Mathematical center of 5000x3517 campus map
     DEFAULT_ZOOM: 18, // Not used for static image, kept for compatibility
     MIN_ZOOM: 15,
     MAX_ZOOM: 20,
