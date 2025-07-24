@@ -33,11 +33,11 @@ export const useImageDimensions = (imageSrc: string): ImageDimensions => {
 
     img.onerror = () => {
       console.error(`Failed to load image: ${imageSrc}`);
-      // Set fallback dimensions (assumed from your constants)
+      // Set fallback dimensions (updated to current image size)
       setDimensions({
-        width: 2000,
-        height: 1600,
-        aspectRatio: 2000 / 1600,
+        width: 5000,
+        height: 3517,
+        aspectRatio: 5000 / 3517,
         isLoaded: true,
       });
     };
