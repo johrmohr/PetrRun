@@ -23,7 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-public/UCI_map.png
+project-memory.md
 models/
 combined_map_reduced.png
 bigMap.png
