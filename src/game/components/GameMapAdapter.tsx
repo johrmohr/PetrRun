@@ -3,59 +3,33 @@ import InteractiveMap from "./InteractiveMap";
 import type { GameMarker } from "../../utils/types";
 
 interface GameMapProps {
-  center: [number, number];
-  zoom: number;
-  height: string;
-  width: string;
+  center?: [number, number]; // Pixel coordinates [x, y] - ignored, InteractiveMap handles centering
+  zoom?: number; // Ignored in favor of InteractiveMap's internal zoom
+  height?: string; // Ignored
+  width?: string; // Ignored
   markers: GameMarker[];
   paths?: Array<{
     positions: [number, number][];
     color: string;
     weight: number;
-  }>;
+  }>; // Not implemented yet
   areas?: Array<{
     center: [number, number];
     radius: number;
     color: string;
     fillColor: string;
     popup: string;
-  }>;
-  playerPosition: [number, number];
-  darkMode?: boolean;
-  enable2_5D?: boolean;
-  gameStyle?: boolean;
-  bounds?: [[number, number], [number, number]];
-  onMapClick?: (position: { lat: number; lng: number }) => void;
-  onMarkerClick?: (marker: GameMarker) => void;
-  onPlayerMove?: (newPosition: [number, number]) => void;
-}
-
-// Helper function to convert geographic coordinates to pixel coordinates
-function geoToPixel(lat: number, lng: number): [number, number] {
-  // Simple conversion for demo purposes - in a real app you'd use proper map projection
-  // These bounds roughly correspond to a small area, converting to 1000x800 pixel space
-  const minLat = 40.705;
-  const maxLat = 40.72;
-  const minLng = -74.015;
-  const maxLng = -73.995;
-
-  const x = ((lng - minLng) / (maxLng - minLng)) * 1000;
-  const y = ((maxLat - lat) / (maxLat - minLat)) * 800; // Flip Y for screen coordinates
-
-  return [Math.max(0, Math.min(1000, x)), Math.max(0, Math.min(800, y))];
-}
-
-// Helper function to convert pixel coordinates to geographic coordinates
-function pixelToGeo(x: number, y: number): { lat: number; lng: number } {
-  const minLat = 40.705;
-  const maxLat = 40.72;
-  const minLng = -74.015;
-  const maxLng = -73.995;
-
-  const lng = minLng + (x / 1000) * (maxLng - minLng);
-  const lat = maxLat - (y / 800) * (maxLat - minLat); // Flip Y back
-
-  return { lat, lng };
+  }>; // Not implemented yet
+  playerPosition: [number, number]; // Pixel coordinates [x, y]
+  darkMode?: boolean; // Ignored
+  enable2_5D?: boolean; // Ignored
+  gameStyle?: boolean; // Ignored
+  bounds?: [[number, number], [number, number]]; // Ignored
+  onMapClick?: (position: { lat: number; lng: number }) => void; // Legacy format for compatibility
+  onMarkerClick?: (marker: GameMarker) => void; // Not implemented yet
+  onPlayerMove?: (newPosition: [number, number]) => void; // Pixel coordinates
+  imageDimensions: { width: number; height: number };
+  onMapImageDataLoaded?: (imageData: ImageData | null) => void; // Pass through to InteractiveMap
 }
 
 const GameMapAdapter: React.FC<GameMapProps> = ({
@@ -63,37 +37,47 @@ const GameMapAdapter: React.FC<GameMapProps> = ({
   playerPosition,
   onMapClick,
   onPlayerMove,
+  imageDimensions,
+  onMapImageDataLoaded,
 }) => {
-  // Convert geographic coordinates to pixel coordinates for InteractiveMap
+  // Convert markers to the format expected by InteractiveMap
   const pixelMarkers = markers.map((marker) => ({
-    position: geoToPixel(marker.position[0], marker.position[1]),
+    position: marker.position, // Already pixel coordinates
     popup: marker.popup,
     color: marker.color,
   }));
 
-  const pixelPlayerPosition = geoToPixel(playerPosition[0], playerPosition[1]);
-
+  // Handle map clicks - InteractiveMap returns pixel coordinates, convert to legacy geo format
   const handlePixelMapClick = (position: { x: number; y: number }) => {
     if (onMapClick) {
-      const geoPos = pixelToGeo(position.x, position.y);
-      onMapClick(geoPos);
+      // Convert pixel coordinates to a fake geographic format for backward compatibility
+      // This maintains compatibility with existing game logic
+      const normalizedX = position.x / imageDimensions.width;
+      const normalizedY = position.y / imageDimensions.height;
+      
+      // Create fake lat/lng that maps consistently to pixel space
+      const fakeLat = 33.65 - (normalizedY * 0.01); // UCI campus latitude range
+      const fakeLng = -117.845 + (normalizedX * 0.01); // UCI campus longitude range
+      
+      onMapClick({ lat: fakeLat, lng: fakeLng });
     }
   };
 
+  // Handle player movement - pass through pixel coordinates directly
   const handlePixelPlayerMove = (newPosition: [number, number]) => {
     if (onPlayerMove) {
-      const geoPos = pixelToGeo(newPosition[0], newPosition[1]);
-      onPlayerMove([geoPos.lat, geoPos.lng]);
+      onPlayerMove(newPosition);
     }
   };
 
   return (
     <InteractiveMap
       markers={pixelMarkers}
-      playerPosition={pixelPlayerPosition}
+      playerPosition={playerPosition}
       onMapClick={handlePixelMapClick}
       onPlayerMove={handlePixelPlayerMove}
-      imageDimensions={{ width: 1000, height: 800 }}
+      imageDimensions={imageDimensions}
+      onMapImageDataLoaded={onMapImageDataLoaded}
     />
   );
 };

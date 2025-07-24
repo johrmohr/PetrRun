@@ -51,73 +51,84 @@ export const DROPSITES = [
   },
 ] as const;
 
-export const DROP_RADIUS = 100; // Increased for larger map (was 50)
+export const DROP_RADIUS = 150; // Pixel radius for drop zones (increased for 2000x1600 map)
 
-// Game constants and configuration
+// Game constants and configuration - All coordinates in pixels [x, y]
 export const GAME_CONFIG = {
   MAP: {
-    DEFAULT_CENTER: [500, 400] as [number, number], // Center of image (assuming ~1000x800 image)
-    DEFAULT_ZOOM: 18, // Not used for static image, kept for compatibility
-    GAME_BOUNDS: undefined, // No bounds for static image
+    DEFAULT_CENTER: [1000, 800] as [number, number], // Center of 2000x1600 map
+    DEFAULT_ZOOM: 1.5, // Default zoom level for InteractiveMap
+    MAP_DIMENSIONS: { width: 2000, height: 1600 }, // Actual UCI map dimensions
   },
 } as const;
 
-// Sample game world data
+// Sample game world data - All coordinates converted to pixels [x, y]
 export const SAMPLE_GAME_DATA = {
   CHECKPOINTS: [
     {
-      position: [40.712, -74.005] as [number, number],
-      popup: "Checkpoint 1: City Hall",
+      position: [800, 400] as [number, number],
+      popup: "Checkpoint 1: Aldrich Park",
+      color: "#00ff00",
     },
     {
-      position: [40.714, -74.008] as [number, number],
-      popup: "Checkpoint 2: Bridge Entrance",
+      position: [1200, 600] as [number, number],
+      popup: "Checkpoint 2: Student Center",
+      color: "#00ff00",
     },
     {
-      position: [40.71, -73.998] as [number, number],
-      popup: "Checkpoint 3: Financial District",
+      position: [600, 1000] as [number, number],
+      popup: "Checkpoint 3: Engineering Building",
+      color: "#00ff00",
     },
   ],
   TREASURES: [
     {
-      position: [40.711, -74.003] as [number, number],
-      popup: "💎 Rare Diamond",
+      position: [1400, 300] as [number, number],
+      popup: "💎 Rare Crystal",
+      color: "#ffd700",
     },
     {
-      position: [40.716, -74.01] as [number, number],
-      popup: "🏆 Golden Trophy",
+      position: [700, 1200] as [number, number],
+      popup: "🏆 Golden Anteater",
+      color: "#ffd700",
     },
     {
-      position: [40.708, -73.996] as [number, number],
-      popup: "💰 Treasure Chest",
+      position: [1600, 800] as [number, number],
+      popup: "💰 UCI Treasure",
+      color: "#ffd700",
     },
   ],
   ENEMIES: [
     {
-      position: [40.713, -74.007] as [number, number],
-      popup: "👾 Enemy Guard",
+      position: [900, 700] as [number, number],
+      popup: "👾 Campus Security",
+      color: "#ff4444",
     },
     {
-      position: [40.709, -74.002] as [number, number],
-      popup: "🤖 Security Bot",
+      position: [1100, 500] as [number, number],
+      popup: "🤖 Study Bot",
+      color: "#ff4444",
     },
   ],
   OBSTACLES: [
     {
-      position: [40.7115, -74.0045] as [number, number],
+      position: [1000, 600] as [number, number],
       popup: "🚧 Construction Zone",
+      color: "#ffaa00",
     },
     {
-      position: [40.7145, -74.0085] as [number, number],
-      popup: "⚠️ Hazard Area",
+      position: [800, 900] as [number, number],
+      popup: "⚠️ Wet Paint Area",
+      color: "#ffaa00",
     },
   ],
   PATHS: [
     {
       positions: [
-        [40.71, -74.006] as [number, number],
-        [40.712, -74.005] as [number, number],
-        [40.714, -74.008] as [number, number],
+        [600, 800] as [number, number],
+        [800, 600] as [number, number],
+        [1000, 400] as [number, number],
+        [1200, 600] as [number, number],
       ],
       color: "#00ff00",
       weight: 4,
@@ -125,11 +136,11 @@ export const SAMPLE_GAME_DATA = {
   ],
   AREAS: [
     {
-      center: [40.712, -74.006] as [number, number],
-      radius: 50,
+      center: [1000, 800] as [number, number],
+      radius: 150,
       color: "#3388ff",
       fillColor: "#3388ff",
-      popup: "Safe Zone",
+      popup: "Safe Zone - Aldrich Park",
     },
   ],
 };

@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UCI Map Dimensions</title>
+</head>
+<body>
+    <h1>UCI Map Image Analysis</h1>
+    <img id="mapImage" src="UCI_map.png" style="max-width: 500px; border: 1px solid #ccc;">
+    <div id="info"></div>
+    
+    <script>
+        const img = document.getElementById('mapImage');
+        const info = document.getElementById('info');
+        
+        img.onload = function() {
+            info.innerHTML = `
+                <h3>Image Dimensions:</h3>
+                <p>Natural Width: ${img.naturalWidth}px</p>
+                <p>Natural Height: ${img.naturalHeight}px</p>
+                <p>Display Width: ${img.clientWidth}px</p>
+                <p>Display Height: ${img.clientHeight}px</p>
+                <p>Aspect Ratio: ${(img.naturalWidth / img.naturalHeight).toFixed(3)}</p>
+            `;
+        };
+    </script>
+</body>
+</html>
+    
