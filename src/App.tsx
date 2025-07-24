@@ -1,5 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import StickerPeel from "./components/StickerPeel";
+
+const stickerUrls = [
+  "/stickers/Space-Explorr-Petr.png",
+  "/stickers/Thanos.png",
+  "/stickers/Superhero-petr.png",
+  "/stickers/Pumpkin-petr.png",
+  "/stickers/Alien.png",
+  // "/stickers/Study-petr.png"
+];
+
+
 
 // Lines for animated text - each will appear as separate bubble
 const introLines = [
@@ -97,6 +109,32 @@ const handleStartGame = () => {
 
 
       <main className="relative flex h-screen w-screen bg-black overflow-hidden">
+        {/* Peelable stickers on black screen */}
+<StickerPeel
+  imageSrc={stickerUrls[0]}
+  className="absolute top-[8%] left-[5%] z-20"
+/>
+<StickerPeel
+  imageSrc={stickerUrls[1]}
+  className="absolute top-[5%] right-[2%] z-20"
+/>
+<StickerPeel
+  imageSrc={stickerUrls[2]}
+  className="absolute bottom-[6%] left-[3%] z-20"
+/>
+<StickerPeel
+  imageSrc={stickerUrls[3]}
+  className="absolute bottom-[3%] right-[1%] z-20"
+/>
+<StickerPeel
+  imageSrc={stickerUrls[4]}
+  className="absolute bottom-[33%] left-[18%] z-20"
+/>
+<StickerPeel
+  imageSrc={stickerUrls[5]}
+  className="absolute bottom-[15%] right-[5%] z-20"
+/>
+
         {/* Background grid pattern */}
         <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
 
@@ -122,20 +160,23 @@ const handleStartGame = () => {
             </span>
           </h1>
           </div>
+{/* Start button */}
+<div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 z-30">
+  <div className="text-center w-max mx-auto">
+    <button
+      onClick={handleStartGame}
+      className="group px-12 py-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-3xl font-bold rounded-2xl shadow-2xl hover:shadow-blue-500/30 hover:scale-110 transition-all duration-300 border-2 border-blue-400/30 hover:from-blue-500 hover:to-purple-500 animate-pulse"
+    >
+      <span className="flex items-center justify-center gap-4">
+        🎮 <span>Click to Start</span> ✨
+      </span>
+    </button>
+    <p className="text-sm text-grey-100 font-medium mt-2">
+      P.S. You can click and drag some stickers — try peeling them off the screen!
+    </p>
+  </div>
+</div>
 
-
-
-        {/* Start button */}
-        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 z-30">
-          <button
-            onClick={handleStartGame}
-            className="group px-12 py-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-3xl font-bold rounded-2xl shadow-2xl hover:shadow-blue-500/30 hover:scale-110 transition-all duration-300 border-2 border-blue-400/30 hover:from-blue-500 hover:to-purple-500 animate-pulse"
-          >
-            <span className="flex items-center justify-center gap-4">
-              🎮 <span>Click to Start</span> ✨
-            </span>
-          </button>
-        </div>
 
         {/* Ambient dots */}
         <div className="absolute inset-0 pointer-events-none">
@@ -162,7 +203,7 @@ const handleStartGame = () => {
 
     <main
   className="relative flex h-screen w-screen bg-cover bg-center overflow-hidden"
-  style={{ backgroundImage: "url('/UCI_map.png')" }}
+  style={{ backgroundImage: "url('/UCI_map_zoomed.png')" }}
 >
 
       {/* Background pattern */}
