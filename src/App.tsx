@@ -3,11 +3,12 @@ import { Link } from "react-router";
 
 // Lines for animated text - each will appear as separate bubble
 const introLines = [
-  "👋 Welcome to UCI's Petr Run! A petr is a cartoon drawing of UCI's mascot, Peter the Anteater.",
+  "👋 Welcome to UCI's Petr Run!",
+  "A petr is a cartoon drawing of UCI's mascot, Peter the Anteater.",
   "The Petr Run tradition began in Fall 2018, when a mysterious student, petr_the_anteatr, placed the first sticker near Aldrich Park.",
   "Petr stickers are hidden in unexpected spots all around campus, from Ring Road to the Student Center.",
   "To claim one, you have to LITERALLY run to the drop location: because once they're gone, they're gone!",
-  "Each sticker is limited, designed by UCI students, and part of an ever growing collectible set.",
+  "Each sticker is limited, designed by UCI students, and part of an ever growing collectible set...",
   "Students quickly discovered these stickers were part of a campus wide game, and the hype spread fast.",
   "Now, when a drop is announced on Instagram, hundreds of students instantly bolt across campus!",
   "Some fans have collected over 700 stickers. Yes, seven hundred!",
@@ -18,23 +19,63 @@ const introLines = [
 export default function App() {
   const [gameStarted, setGameStarted] = useState(false);
   const [currentLine, setCurrentLine] = useState(0);
+  const [displayedText, setDisplayedText] = useState("");
+  const [charIndex, setCharIndex] = useState(0);
+
+useEffect(() => {
+  const audio = document.getElementById("bg-music") as HTMLAudioElement | null;
+
+  if (audio) {
+    audio.muted = false;
+    audio.volume = 0;
+
+    let volume = 0;
+    const interval = setInterval(() => {
+      if (volume < 0.3) {
+        volume += 0.02;
+        audio.volume = volume;
+      } else {
+        clearInterval(interval);
+      }
+    }, 150);
+
+    return () => clearInterval(interval);
+  }
+}, []); // empty dependency — runs only once
 
 useEffect(() => {
   if (!gameStarted) return;
 
   if (currentLine < introLines.length) {
-    const delay = currentLine === 0 ? 900 : 5800; // 1.5s for first, 5s for others
-    const timeout = setTimeout(() => {
-      setCurrentLine(currentLine + 1);
-    }, delay);
-    return () => clearTimeout(timeout);
+    const fullLine = introLines[currentLine];
+
+    if (charIndex < fullLine.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText((prev) => prev + fullLine[charIndex]);
+        setCharIndex((prev) => prev + 1);
+      }, currentLine === 0 && charIndex === 0 ? 5 : 50);
+      return () => clearTimeout(timeout);
+    } else {
+      const linePause = setTimeout(() => {
+        setCurrentLine((prev) => prev + 1);
+        setDisplayedText("");
+        setCharIndex(0);
+      }, 2000);
+      return () => clearTimeout(linePause);
+    }
   }
-}, [currentLine, gameStarted]);
+}, [charIndex, currentLine, gameStarted]);
 
 
-  const handleStartGame = () => {
-    setGameStarted(true);
-  };
+
+const handleStartGame = () => {
+  const audio = document.getElementById("bg-music") as HTMLAudioElement | null;
+  if (audio) {
+    audio.muted = false;
+    audio.play().catch((err) => console.error("Failed to play audio:", err));
+  }
+  setGameStarted(true);
+};
 
   const handleSkipTutorial = () => {
     setGameStarted(true);
@@ -45,7 +86,15 @@ useEffect(() => {
   if (!gameStarted) {
     return (
       <>
-      <audio src="/Elevator-music.mp3" controls autoPlay loop />
+      <audio
+  id="bg-music"
+  src="/Elevator-music.mp3"
+  autoPlay
+  loop
+  muted
+  style={{ display: "none" }}
+/>
+
 
       <main className="relative flex h-screen w-screen bg-black overflow-hidden">
         {/* Background grid pattern */}
@@ -102,7 +151,15 @@ useEffect(() => {
 
   return (
           <>
-      <audio src="/Elevator-music.mp3" controls autoPlay loop />
+      <audio
+  id="bg-music"
+  src="/Elevator-music.mp3"
+  autoPlay
+  loop
+  muted
+  style={{ display: "none" }}
+/>
+
     <main
   className="relative flex h-screen w-screen bg-cover bg-center overflow-hidden"
   style={{ backgroundImage: "url('/UCI_map.png')" }}
@@ -121,45 +178,52 @@ useEffect(() => {
         />
       </div>
 
-      {/* Dialog bubble */}
-{/* Dialog bubble */}
+{/* Dialog box for intro lines */}
 <div className="absolute bottom-8 left-1/2 -translate-x-[35%] max-w-4xl w-[min(95vw,800px)] z-20">
-  {currentLine > 0 && (
+  {gameStarted && (
     <div className="relative">
-      <div className="rounded-xl shadow-2xl bg-gray-900/95 backdrop-blur-xl border-2 border-blue-500/30 px-8 py-6 text-white">
-        <div className="absolute -top-4 left-6 bg-blue-600 px-4 py-1 rounded-full text-sm font-bold border-2 border-blue-400">
+      <div className="rounded-xl shadow-2xl bg-gray-900/95 backdrop-blur-xl border-2 border-blue-500/30 px-6 py-5 text-white">
+        <div className="absolute -top-4 left-6 bg-blue-600 px-3 py-1 rounded-full text-xs sm:text-sm font-bold border-2 border-blue-400">
           Petr the Anteater
         </div>
-        <div className="text-xl sm:text-2xl font-medium leading-relaxed animate-fadeInUp pt-2">
-          <>
-            {currentLine === introLines.length ? (
-              <div className="flex flex-wrap justify-between items-center gap-4">
-                <span>Ready to join the run? 🏃‍♂️</span>
-                <Link
+
+        <div className="text-base sm:text-lg font-medium leading-relaxed animate-fadeInUp pt-2">
+          {currentLine === introLines.length ? (
+            <div className="flex items-center gap-3">
+              <span className="text-white text-base sm:text-lg md:text-xl font-semibold">
+                Ready to join the run? 🏃‍♂️
+              </span>
+              <Link
                 to="/game"
-                className="px-6 py-3 text-lg sm:text-xl font-semibold rounded-xl bg-blue-400 text-white shadow-md hover:scale-105 transition-transform duration-200 text-center"
+                className="px-5 py-2 text-base sm:text-lg font-semibold rounded-xl bg-blue-400 text-white shadow-md hover:scale-105 transition-transform duration-200"
               >
                 Start Game
               </Link>
+            </div>
+          ) : (
+            <>
+              <span className="text-white text-lg sm:text-xl md:text-2xl font-semibold">
+  {displayedText}
+</span>
 
-              </div>
-            ) : (
-              introLines[currentLine - 1]
-            )}
-
-          </>
+              <span className="inline-block w-1 bg-white animate-blink ml-1" />
+            </>
+          )}
         </div>
+
         {currentLine < introLines.length && (
-          <div className="flex items-center gap-1 mt-4 opacity-60">
-            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-150" />
-            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-300" />
+          <div className="flex items-center gap-1 mt-3 opacity-60">
+            <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+            <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse delay-150" />
+            <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse delay-300" />
           </div>
         )}
       </div>
     </div>
   )}
 </div>
+
+
 
 
       {/* Skip tutorial */}
@@ -200,6 +264,14 @@ useEffect(() => {
           .group:hover {
             transform: translateY(-2px);
           }
+            @keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-blink {
+  animation: blink 1s step-start infinite;
+}
+
         `}
       </style>
     </main>
