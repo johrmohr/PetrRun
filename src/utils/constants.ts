@@ -1,10 +1,3 @@
-export const stickerUrls = [
-  "/stickers/Space-Explorr-Petr.png",
-  "/stickers/Thanos.png",
-  "/stickers/Trombone_petr.png",
-  "/stickers/Trombone_petr.png",
-];
-
 // Available drop sites for random selection (pixel coordinates [x, y])
 export const DROPSITES = [
   {
@@ -13,23 +6,24 @@ export const DROPSITES = [
     photo: "/stickers/Space-Explorr-Petr.png",
     location: [800, 600] as [number, number], // Updated for 2000x1600 map
     difficulty: "medium",
-    description: "The iconic space exploration center where Petr dreams of the stars"
+    description:
+      "The iconic space exploration center where Petr dreams of the stars",
   },
   {
     id: "thanos-statue",
-    name: "The Purple Monument", 
+    name: "The Purple Monument",
     photo: "/stickers/Thanos.png",
     location: [1200, 400] as [number, number], // Updated for 2000x1600 map
     difficulty: "hard",
-    description: "A mysterious purple structure that appeared overnight"
+    description: "A mysterious purple structure that appeared overnight",
   },
   {
     id: "music-pavilion",
     name: "Trombone Performance Stage",
-    photo: "/stickers/Trombone_petr.png", 
+    photo: "/stickers/Trombone_petr.png",
     location: [600, 1000] as [number, number], // Updated for 2000x1600 map
     difficulty: "easy",
-    description: "Where Petr practices his musical talents"
+    description: "Where Petr practices his musical talents",
   },
   {
     id: "aldrich-park",
@@ -37,15 +31,15 @@ export const DROPSITES = [
     photo: "/stickers/Space-Explorr-Petr.png", // Reusing for now
     location: [1000, 800] as [number, number], // Updated for 2000x1600 map
     difficulty: "medium",
-    description: "The heart of campus where students gather"
+    description: "The heart of campus where students gather",
   },
   {
     id: "engineering-tower",
-    name: "The Engineering Spire", 
+    name: "The Engineering Spire",
     photo: "/stickers/Thanos.png", // Reusing for now
     location: [1400, 300] as [number, number], // Updated for 2000x1600 map
-    difficulty: "hard", 
-    description: "The tallest structure visible from across campus"
+    difficulty: "hard",
+    description: "The tallest structure visible from across campus",
   },
   {
     id: "student-center",
@@ -53,8 +47,8 @@ export const DROPSITES = [
     photo: "/stickers/Trombone_petr.png", // Reusing for now
     location: [700, 1200] as [number, number], // Updated for 2000x1600 map
     difficulty: "easy",
-    description: "Where Petrs fuel up between classes"
-  }
+    description: "Where Petrs fuel up between classes",
+  },
 ] as const;
 
 export const DROP_RADIUS = 100; // Increased for larger map (was 50)
@@ -64,37 +58,7 @@ export const GAME_CONFIG = {
   MAP: {
     DEFAULT_CENTER: [500, 400] as [number, number], // Center of image (assuming ~1000x800 image)
     DEFAULT_ZOOM: 18, // Not used for static image, kept for compatibility
-    MIN_ZOOM: 15,
-    MAX_ZOOM: 20,
     GAME_BOUNDS: undefined, // No bounds for static image
-  },
-  PLAYER: {
-    SPEED: 100, // pixels per second
-    SIZE: 24,
-    MOVE_DISTANCE: 10, // Movement distance in pixels for WASD
-  },
-  MARKERS: {
-    CHECKPOINT: {
-      COLOR: "#ffff00",
-      SIZE: 16,
-    },
-    TREASURE: {
-      COLOR: "#ffa500",
-      SIZE: 18,
-    },
-    ENEMY: {
-      COLOR: "#ff1493",
-      SIZE: 20,
-    },
-    OBSTACLE: {
-      COLOR: "#ff0000",
-      SIZE: 14,
-    },
-  },
-  UI: {
-    DARK_MODE: true,
-    ENABLE_2_5D: true,
-    GAME_STYLE: true,
   },
 } as const;
 

@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import GameMap from "../components/GameMap";
 import ImagePreloader from "../components/ImagePreloader";
-import { GAME_CONFIG, DROPSITES, DROP_RADIUS } from "../utils/constants";
+import { DROPSITES, DROP_RADIUS } from "../utils/constants";
 import type { Dropsite } from "../utils/types";
 
 // Game states
@@ -166,8 +166,6 @@ export default function Game() {
       {/* Map always visible, but disables controls except in playing phase */}
       <div className="w-full h-full">
         <GameMap
-          center={playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER}
-          zoom={18}
           playerPosition={playerPos || undefined}
           imageDimensions={imageDimensions}
           markers={
@@ -175,7 +173,6 @@ export default function Game() {
               ? [
                   {
                     position: currentDropsite.location,
-                    type: "treasure",
                     popup: `${currentDropsite.name} - Petr Drop!`,
                     color: "#ffa500",
                   },

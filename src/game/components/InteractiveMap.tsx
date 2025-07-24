@@ -1,25 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import ZoomSlider from "./ZoomSlider";
+import ZoomControl from "@/ui/ZoomControl";
 
-interface GameMarker {
+interface MapMarker {
   position: [number, number]; // Now [x, y] pixels instead of [lat, lng]
   popup?: string;
-  type?: "player" | "checkpoint" | "obstacle" | "treasure" | "enemy" | "default";
   color?: string;
 }
 
 interface ImageDimensions {
   width: number;
   height: number;
-  aspectRatio: number;
 }
 
 interface GameMapProps {
-  center?: [number, number]; // [x, y] pixels
-  zoom?: number; // Not used for static image, kept for compatibility
-  height?: string;
-  width?: string;
-  markers?: GameMarker[];
+  markers?: MapMarker[];
   playerPosition?: [number, number]; // [x, y] pixels
   onMapClick?: (position: { x: number; y: number }) => void;
   onPlayerMove?: (newPosition: [number, number]) => void;
@@ -82,26 +76,23 @@ function WASDControls({
 }
 
 const GameMap: React.FC<GameMapProps> = ({
-  center = [500, 400], // Default center pixels
   markers = [],
   playerPosition,
   onMapClick,
   onPlayerMove,
-  height = "100%",
-  width = "100%",
   imageDimensions,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   // Load zoom level from localStorage or use default
   const [zoomLevel, setZoomLevel] = useState(() => {
-    const savedZoom = localStorage.getItem('petrrun-zoom-level');
+    const savedZoom = localStorage.getItem("petrrun-zoom-level");
     return savedZoom ? parseFloat(savedZoom) : 2.5;
   });
 
   // Save zoom level to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem('petrrun-zoom-level', zoomLevel.toString());
+    localStorage.setItem("petrrun-zoom-level", zoomLevel.toString());
   }, [zoomLevel]);
 
   // Keyboard shortcuts for zoom control
@@ -109,26 +100,26 @@ const GameMap: React.FC<GameMapProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       // Only handle zoom shortcuts when not typing in input fields
       if (e.target instanceof HTMLInputElement) return;
-      
+
       switch (e.key) {
-        case '=':
-        case '+':
+        case "=":
+        case "+":
           e.preventDefault();
-          setZoomLevel(prev => Math.min(4, prev + 0.2));
+          setZoomLevel((prev) => Math.min(4, prev + 0.2));
           break;
-        case '-':
+        case "-":
           e.preventDefault();
-          setZoomLevel(prev => Math.max(0.5, prev - 0.2));
+          setZoomLevel((prev) => Math.max(0.5, prev - 0.2));
           break;
-        case '0':
+        case "0":
           e.preventDefault();
           setZoomLevel(2.5); // Reset to default
           break;
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   // Calculate camera transform to follow player
@@ -139,21 +130,21 @@ const GameMap: React.FC<GameMapProps> = ({
 
     const containerWidth = containerRef.current.clientWidth;
     const containerHeight = containerRef.current.clientHeight;
-    
+
     // Calculate how much to translate to center the player
     const centerX = containerWidth / 2;
     const centerY = containerHeight / 2;
-    
+
     // Use the zoom level from the slider
     const scale = zoomLevel;
-    
+
     // Calculate translation to keep player centered (accounting for scale)
-    const translateX = centerX - (playerPosition[0] * scale);
-    const translateY = centerY - (playerPosition[1] * scale);
+    const translateX = centerX - playerPosition[0] * scale;
+    const translateY = centerY - playerPosition[1] * scale;
 
     return {
       transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
-      transformOrigin: '0 0'
+      transformOrigin: "0 0",
     };
   };
 
@@ -163,30 +154,30 @@ const GameMap: React.FC<GameMapProps> = ({
 
     const rect = containerRef.current.getBoundingClientRect();
     const scale = playerPosition ? zoomLevel : Math.max(zoomLevel * 0.6, 0.5); // Use current zoom level
-    
+
     // Get click position relative to container
     const containerX = e.clientX - rect.left;
     const containerY = e.clientY - rect.top;
 
     // Calculate actual map position accounting for zoom and translation
     let mapX, mapY;
-    
+
     if (playerPosition) {
       const centerX = containerRef.current.clientWidth / 2;
       const centerY = containerRef.current.clientHeight / 2;
-      
-      const translateX = centerX - (playerPosition[0] * scale);
-      const translateY = centerY - (playerPosition[1] * scale);
-      
+
+      const translateX = centerX - playerPosition[0] * scale;
+      const translateY = centerY - playerPosition[1] * scale;
+
       mapX = (containerX - translateX) / scale;
       mapY = (containerY - translateY) / scale;
-          } else {
-        // No player position, just account for scale
-        const centerX = containerRef.current.clientWidth / 2;
-        const centerY = containerRef.current.clientHeight / 2;
-        mapX = (containerX - centerX) / scale + imageDimensions.width / 2;
-        mapY = (containerY - centerY) / scale + imageDimensions.height / 2;
-      }
+    } else {
+      // No player position, just account for scale
+      const centerX = containerRef.current.clientWidth / 2;
+      const centerY = containerRef.current.clientHeight / 2;
+      mapX = (containerX - centerX) / scale + imageDimensions.width / 2;
+      mapY = (containerY - centerY) / scale + imageDimensions.height / 2;
+    }
 
     onMapClick({ x: mapX, y: mapY });
   };
@@ -207,12 +198,12 @@ const GameMap: React.FC<GameMapProps> = ({
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoomLevel(prev => Math.max(0.5, Math.min(4, prev + delta)));
+    setZoomLevel((prev) => Math.max(0.5, Math.min(4, prev + delta)));
   };
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className="relative w-full h-full overflow-hidden bg-gray-200"
       onWheel={handleWheel}
     >
@@ -238,7 +229,7 @@ const GameMap: React.FC<GameMapProps> = ({
           height: `${imageDimensions.height}px`,
           willChange: "transform", // Optimize for animations
           backfaceVisibility: "hidden", // Prevent flickering
-          ...getCameraTransform()
+          ...getCameraTransform(),
         }}
       >
         {/* Player Marker */}
@@ -247,15 +238,15 @@ const GameMap: React.FC<GameMapProps> = ({
             className="absolute z-20 pointer-events-none"
             style={{
               left: playerPosition[0] - 32, // Half of 64px width
-              top: playerPosition[1] - 32,  // Half of 64px height
+              top: playerPosition[1] - 32, // Half of 64px height
             }}
           >
-            <img 
-              src="/stickers/Trombone_petr.png" 
-              alt="Player" 
+            <img
+              src="/stickers/Trombone_petr.png"
+              alt="Player"
               className="w-16 h-16 object-contain drop-shadow-lg"
               style={{
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
               }}
             />
           </div>
@@ -287,12 +278,10 @@ const GameMap: React.FC<GameMapProps> = ({
             )}
           </div>
         ))}
-
-        {/* Map Instructions - Fixed position relative to viewport */}
       </div>
-      
-      {/* Zoom Control Slider */}
-      <ZoomSlider
+
+      {/* Zoom Control */}
+      <ZoomControl
         zoomLevel={zoomLevel}
         onZoomChange={setZoomLevel}
         className="absolute top-4 right-4 z-30"
@@ -302,7 +291,9 @@ const GameMap: React.FC<GameMapProps> = ({
       <div className="absolute bottom-4 left-4 bg-black bg-opacity-70 text-white text-sm px-3 py-2 rounded backdrop-blur z-30">
         <div className="space-y-1">
           <div>
-            {onPlayerMove ? "Use WASD to move • Map follows you" : "Click to select start position"}
+            {onPlayerMove
+              ? "Use WASD to move • Map follows you"
+              : "Click to select start position"}
           </div>
           <div className="text-xs opacity-75">
             Zoom: Mouse wheel or +/- keys • Reset: 0 key

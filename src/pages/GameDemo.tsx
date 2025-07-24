@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import GameMap from "../components/GameMap";
+import GameMapAdapter from "@/game/components/GameMapAdapter";
 import { GAME_CONFIG, SAMPLE_GAME_DATA } from "../utils/constants";
 import type { GameMarker, Player } from "../utils/types";
 
@@ -117,19 +117,8 @@ const GameDemo: React.FC = () => {
     }
   };
 
-  const handleMarkerClick = (marker: GameMarker) => {
-    setGameLog((prev) => [
-      ...prev,
-      `🎯 Clicked on ${marker.popup || marker.type}`,
-    ]);
-  };
 
-  const handleMapClick = (latlng: L.LatLng) => {
-    setGameLog((prev) => [
-      ...prev,
-      `📍 Clicked map at ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`,
-    ]);
-  };
+
 
   const resetGame = () => {
     setPlayer({
@@ -176,7 +165,7 @@ const GameDemo: React.FC = () => {
     >
       {/* Game Map */}
       <div style={{ flex: 1 }}>
-        <GameMap
+        <GameMapAdapter
           center={player.position}
           zoom={GAME_CONFIG.MAP.DEFAULT_ZOOM}
           height="100vh"
@@ -188,11 +177,7 @@ const GameDemo: React.FC = () => {
           darkMode={gameSettings.darkMode}
           enable2_5D={gameSettings.enable2_5D}
           gameStyle={gameSettings.gameStyle}
-          bounds={
-            GAME_CONFIG.MAP.GAME_BOUNDS as [[number, number], [number, number]]
-          }
-          onMapClick={handleMapClick}
-          onMarkerClick={handleMarkerClick}
+
           onPlayerMove={handlePlayerMove}
         />
       </div>
