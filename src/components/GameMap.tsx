@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import ZoomSlider from "./ZoomSlider";
+import { useCollisionDetection, type UseCollisionDetectionReturn } from "../hooks/useCollisionDetection";
 
 interface GameMarker {
   position: [number, number]; // Now [x, y] pixels instead of [lat, lng]
@@ -24,6 +25,7 @@ interface GameMapProps {
   onMapClick?: (position: { x: number; y: number }) => void;
   onPlayerMove?: (newPosition: [number, number]) => void;
   imageDimensions: ImageDimensions; // New prop for image dimensions
+  gamePhase?: string; // Current game phase
 }
 
 // WASD Controls Component with smooth movement
@@ -32,11 +34,13 @@ function WASDControls({
   playerPosition,
   mapRef,
   imageDimensions,
+  collision,
 }: {
   onPlayerMove?: (newPosition: [number, number]) => void;
   playerPosition?: [number, number];
   mapRef: React.RefObject<HTMLDivElement | null>;
   imageDimensions: ImageDimensions;
+  collision: UseCollisionDetectionReturn;
 }) {
   const keysPressed = useRef<Set<string>>(new Set());
   const animationFrame = useRef<number | null>(null);
@@ -48,40 +52,52 @@ function WASDControls({
   useEffect(() => {
     if (!onPlayerMove) return;
 
-    const moveSpeed = 25; // pixels per frame (60fps = ~1500 pixels/second) - increased for responsiveness
+    const baseMoveSpeed = 25; // Base pixels per frame (60fps = ~1500 pixels/second)
 
     const updatePosition = () => {
       const currentPos = currentPosition.current;
-      console.log('updatePosition called, currentPos:', currentPos, 'keysPressed:', Array.from(keysPressed.current));
-      
       if (!currentPos || keysPressed.current.size === 0) {
-        console.log('Stopping animation loop - no position or no keys');
         animationFrame.current = null;
         return;
       }
+
+      // Calculate movement based on terrain speed
+      const currentSpeed = collision.isLoaded 
+        ? collision.calculateSpeed(currentPos[0], currentPos[1], baseMoveSpeed)
+        : baseMoveSpeed;
 
       let newX = currentPos[0];
       let newY = currentPos[1];
 
       // Handle multiple keys simultaneously for diagonal movement
       if (keysPressed.current.has("w") || keysPressed.current.has("arrowup")) {
-        newY = Math.max(0, newY - moveSpeed);
+        const tentativeY = Math.max(0, newY - currentSpeed);
+        // Check if movement is valid (not blocked)
+        if (!collision.isLoaded || collision.checkMovement(currentPos[0], currentPos[1], currentPos[0], tentativeY)) {
+          newY = tentativeY;
+        }
       }
       if (keysPressed.current.has("s") || keysPressed.current.has("arrowdown")) {
-        newY = Math.min(imageDimensions.height, newY + moveSpeed);
+        const tentativeY = Math.min(imageDimensions.height, newY + currentSpeed);
+        if (!collision.isLoaded || collision.checkMovement(currentPos[0], currentPos[1], currentPos[0], tentativeY)) {
+          newY = tentativeY;
+        }
       }
       if (keysPressed.current.has("a") || keysPressed.current.has("arrowleft")) {
-        newX = Math.max(0, newX - moveSpeed);
+        const tentativeX = Math.max(0, newX - currentSpeed);
+        if (!collision.isLoaded || collision.checkMovement(currentPos[0], currentPos[1], tentativeX, currentPos[1])) {
+          newX = tentativeX;
+        }
       }
       if (keysPressed.current.has("d") || keysPressed.current.has("arrowright")) {
-        newX = Math.min(imageDimensions.width, newX + moveSpeed);
+        const tentativeX = Math.min(imageDimensions.width, newX + currentSpeed);
+        if (!collision.isLoaded || collision.checkMovement(currentPos[0], currentPos[1], tentativeX, currentPos[1])) {
+          newX = tentativeX;
+        }
       }
 
-      console.log('Position change:', currentPos, '->', [newX, newY]);
-
-      // Only update if position changed
+            // Only update if position changed
       if (newX !== currentPos[0] || newY !== currentPos[1]) {
-        console.log('Calling onPlayerMove with:', [newX, newY]);
         onPlayerMove([newX, newY]);
       }
 
@@ -97,11 +113,8 @@ function WASDControls({
       if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
         e.preventDefault();
         keysPressed.current.add(key);
-        console.log('Key pressed:', key, 'Active keys:', Array.from(keysPressed.current));
-        
         // Start animation loop if not already running
         if (!animationFrame.current) {
-          console.log('Starting animation loop');
           animationFrame.current = requestAnimationFrame(updatePosition);
         }
       }
@@ -135,7 +148,7 @@ function WASDControls({
         animationFrame.current = null;
       }
     };
-  }, [onPlayerMove, imageDimensions]); // Removed playerPosition from dependencies
+  }, [onPlayerMove, imageDimensions, collision]); // Added collision dependency
 
   return null;
 }
@@ -214,15 +227,47 @@ const GameMap: React.FC<GameMapProps> = ({
   height = "100%",
   width = "100%",
   imageDimensions,
+  gamePhase,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Initialize collision detection
+  const collision = useCollisionDetection();
   
   // Load zoom level from localStorage or use default
   const [zoomLevel, setZoomLevel] = useState(() => {
     const savedZoom = localStorage.getItem('petrrun-zoom-level');
     return savedZoom ? parseFloat(savedZoom) : 2.5;
   });
+
+  // Auto-center fix: zoom in/out right after loading screen to force camera recalculation
+  useEffect(() => {
+    if (collision.isLoaded && !collision.isLoading) {
+      console.log('🎯 Auto-center fix triggered! Collision map loaded:', collision.isLoaded);
+      
+      // Small zoom adjustment to force camera transform recalculation
+      const originalZoom = zoomLevel;
+      console.log('📊 Original zoom level:', originalZoom);
+      
+      // Zoom in slightly, then back to original (imperceptible to user)
+      const zoomIn = originalZoom + 1;
+      console.log('🔍 Step 1: Zooming IN to', zoomIn);
+      setZoomLevel(zoomIn);
+      
+      setTimeout(() => {
+        const zoomOut = originalZoom - 1;
+        console.log('🔍 Step 2: Zooming OUT to', zoomOut);
+        setZoomLevel(zoomOut);
+        
+        setTimeout(() => {
+          console.log('🔍 Step 3: Returning to original zoom', originalZoom);
+          setZoomLevel(0.7);
+          console.log('✅ Auto-center fix complete!');
+        }, 50);
+      }, 50);
+    }
+  }, [collision.isLoaded, collision.isLoading]); // Trigger when collision map finishes loading
 
   // Save zoom level to localStorage when it changes
   useEffect(() => {
@@ -262,77 +307,118 @@ const GameMap: React.FC<GameMapProps> = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Calculate camera transform to follow player
+  // Calculate camera transform based on game phase and player position
   const getCameraTransform = () => {
-    if (!playerPosition || !containerRef.current) {
+    if (!containerRef.current) {
       return { 
         transform: `scale(${Math.max(zoomLevel * 0.6, 0.5)})`,
         transformOrigin: '0 0'
-      }; // Minimum zoom when no player
+      };
     }
 
     const containerWidth = containerRef.current.clientWidth;
     const containerHeight = containerRef.current.clientHeight;
-    
-    // Calculate how much to translate to center the player
     const centerX = containerWidth / 2;
     const centerY = containerHeight / 2;
-    
-    // Use the zoom level from the slider
     const scale = zoomLevel;
-    
-    // Calculate translation to keep player perfectly centered (accounting for scale)
-    const translateX = centerX - (playerPosition[0] * scale);
-    const translateY = centerY - (playerPosition[1] * scale);
+
+    // During countdown phase, always center on the specified center point
+    if (gamePhase === "countdown") {
+      const translateX = centerX - (center[0] * scale);
+      const translateY = centerY - (center[1] * scale);
+      return {
+        transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
+        transformOrigin: '0 0',
+        willChange: 'transform',
+      };
+    }
+
+    // During playing phase, follow the player if they exist
+    if (playerPosition && gamePhase === "playing") {
+      const translateX = centerX - (playerPosition[0] * scale);
+      const translateY = centerY - (playerPosition[1] * scale);
+      return {
+        transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
+        transformOrigin: '0 0',
+        willChange: 'transform',
+      };
+    }
+
+    // Default behavior: center on specified center or player position
+    const targetPosition = playerPosition || center;
+    const translateX = centerX - (targetPosition[0] * scale);
+    const translateY = centerY - (targetPosition[1] * scale);
 
     return {
       transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
       transformOrigin: '0 0',
-      willChange: 'transform', // Optimize for frequent updates
+      willChange: 'transform',
     };
   };
 
-  // Handle map clicks (adjust for zoom and translation)
+  // Handle map clicks (adjust for zoom and translation) - using exact same logic as getCameraTransform
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!onMapClick || !mapRef.current || !containerRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
-    const scale = playerPosition ? zoomLevel : Math.max(zoomLevel * 0.6, 0.5); // Use current zoom level
     
     // Get click position relative to container
     const containerX = e.clientX - rect.left;
     const containerY = e.clientY - rect.top;
 
-    // Calculate actual map position accounting for zoom and translation
+    const containerWidth = containerRef.current.clientWidth;
+    const containerHeight = containerRef.current.clientHeight;
+    const centerX = containerWidth / 2;
+    const centerY = containerHeight / 2;
+    const scale = zoomLevel; // Use exact same scale as camera transform
+    
+    // Calculate actual map position using EXACT same logic as getCameraTransform (but reversed)
     let mapX, mapY;
     
-    if (playerPosition) {
-      const centerX = containerRef.current.clientWidth / 2;
-      const centerY = containerRef.current.clientHeight / 2;
-      
-      const translateX = centerX - (playerPosition[0] * scale);
-      const translateY = centerY - (playerPosition[1] * scale);
-      
+    if (gamePhase === "countdown") {
+      // During countdown, camera centers on specified center point
+      const translateX = centerX - (center[0] * scale);
+      const translateY = centerY - (center[1] * scale);
       mapX = (containerX - translateX) / scale;
       mapY = (containerY - translateY) / scale;
-          } else {
-        // No player position, just account for scale
-        const centerX = containerRef.current.clientWidth / 2;
-        const centerY = containerRef.current.clientHeight / 2;
-        mapX = (containerX - centerX) / scale + imageDimensions.width / 2;
-        mapY = (containerY - centerY) / scale + imageDimensions.height / 2;
-      }
+    } else if (playerPosition && gamePhase === "playing") {
+      // During playing, camera follows player
+      const translateX = centerX - (playerPosition[0] * scale);
+      const translateY = centerY - (playerPosition[1] * scale);
+      mapX = (containerX - translateX) / scale;
+      mapY = (containerY - translateY) / scale;
+    } else {
+      // Default behavior: use target position (player or center)
+      const targetPosition = playerPosition || center;
+      const translateX = centerX - (targetPosition[0] * scale);
+      const translateY = centerY - (targetPosition[1] * scale);
+      mapX = (containerX - translateX) / scale;
+      mapY = (containerY - translateY) / scale;
+    }
 
+    console.log('🖱️ Click at screen:', containerX, containerY, '→ Map:', mapX, mapY, '(scale:', scale, ')');
     onMapClick({ x: mapX, y: mapY });
   };
 
-  // Show loading while detecting image dimensions
+  // Show loading while detecting image dimensions or collision map
   if (!imageDimensions) {
     return (
       <div className="relative w-full h-full flex items-center justify-center bg-gray-200">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Preparing map...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show collision map loading status
+  if (collision.isLoading) {
+    return (
+      <div className="relative w-full h-full flex items-center justify-center bg-gray-200">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading collision map...</p>
         </div>
       </div>
     );
@@ -357,6 +443,7 @@ const GameMap: React.FC<GameMapProps> = ({
         playerPosition={playerPosition}
         mapRef={mapRef}
         imageDimensions={imageDimensions}
+        collision={collision}
       />
 
       {/* Map Container with Camera Transform */}
@@ -444,6 +531,32 @@ const GameMap: React.FC<GameMapProps> = ({
           <div className="text-xs opacity-75">
             Zoom: Mouse wheel or +/- keys • Reset: 0 key
           </div>
+          {/* Terrain indicator */}
+          {playerPosition && collision.isLoaded && (
+            <div className="text-xs opacity-75 flex items-center gap-2">
+              <span>Terrain:</span>
+              {(() => {
+                const terrain = collision.getTerrainInfo(playerPosition[0], playerPosition[1]);
+                const terrainIcon = {
+                  'blocked': '🚫',
+                  'fast': '🟢',
+                  'grass': '🟡',
+                  'stairs': '🟠',
+                  'normal': '⚪'
+                }[terrain.terrainType];
+                const speedText = terrain.terrainType === 'blocked' 
+                  ? 'Blocked' 
+                  : `${Math.round(terrain.speedMultiplier * 100)}% speed`;
+                return (
+                  <span className="flex items-center gap-1">
+                    {terrainIcon}
+                    <span>{terrain.terrainType}</span>
+                    <span>({speedText})</span>
+                  </span>
+                );
+              })()}
+            </div>
+          )}
         </div>
       </div>
     </div>

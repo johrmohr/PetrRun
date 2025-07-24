@@ -9,8 +9,9 @@ type GamePhase = "start" | "countdown" | "reveal" | "playing" | "victory" | "res
 
 // Function to select a random dropsite
 const selectRandomDropsite = (): Dropsite => {
-  const randomIndex = Math.floor(Math.random() * DROPSITES.length);
-  return DROPSITES[randomIndex];
+  const debugIndex = 5;
+  // const randomIndex = Math.floor(Math.random() * DROPSITES.length);
+  return DROPSITES[debugIndex];
 };
 
 export default function Game() {
@@ -109,23 +110,21 @@ export default function Game() {
         </div>
       )}
       {phase === "countdown" && (
-        <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-white bg-opacity-95 p-8 rounded-lg shadow-xl text-center">
+        <div className="absolute z-10 top-4 left-4 game-ui-overlay bg-white bg-opacity-95 p-8 rounded-lg shadow-xl text-center">
           <div className="text-5xl font-bold text-blue-600">
             {countdown > 0 ? countdown : "🎯 ZOT!"}
           </div>
         </div>
       )}
       {phase === "playing" && (
-        <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-white bg-opacity-95 p-6 rounded-lg shadow-xl text-center">
+        <div className="absolute z-10 top-4 left-4 game-ui-overlay bg-white bg-opacity-95 p-6 rounded-lg shadow-xl">
           <div className="flex items-center gap-6">
             {/* Photo on the left */}
             <div className="flex-shrink-0">
               <h3 className="text-lg font-bold mb-2 text-gray-800">Find this location!</h3>
               <img src={currentDropsite.photo} alt="Drop site" className="w-48 h-48 object-contain rounded-lg shadow-md" />
               <p className="text-sm text-gray-600 mt-2">{currentDropsite.description}</p>
-              <p className="text-xs text-gray-500 mt-1 bg-gray-100 px-2 py-1 rounded">
-                Difficulty: {currentDropsite.difficulty}
-              </p>
+              {/* Difficulty label hidden as requested */}
             </div>
             {/* Timer and info on the right */}
             <div className="flex flex-col items-center">
@@ -139,22 +138,20 @@ export default function Game() {
         </div>
       )}
       {phase === "victory" && (
-        <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-green-50 bg-opacity-95 border-2 border-green-200 p-6 rounded-lg shadow-xl text-center">
+        <div className="absolute z-10 top-4 left-4 game-ui-overlay bg-green-50 bg-opacity-95 border-2 border-green-200 p-6 rounded-lg shadow-xl text-center">
           <div className="text-3xl font-bold text-green-600">
             🎉 You found the drop! 🎉
           </div>
         </div>
       )}
       {phase === "results" && (
-        <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-white bg-opacity-95 p-8 rounded-lg shadow-xl text-center">
+        <div className="absolute z-10 top-4 left-4 game-ui-overlay bg-white bg-opacity-95 p-8 rounded-lg shadow-xl text-center">
           <h2 className="text-2xl font-bold mb-4 text-gray-800">🏆 Results</h2>
           <p className="mb-2 text-lg"><strong className="text-blue-600">{currentDropsite.name}</strong></p>
           <p className="mb-2 text-2xl font-mono font-bold text-green-600">
             Time: {(timer / 1000).toFixed(2)}s
           </p>
-          <p className="text-sm text-gray-600 mb-6 bg-gray-100 px-3 py-1 rounded">
-            Difficulty: {currentDropsite.difficulty}
-          </p>
+          {/* Difficulty label hidden for consistency */}
           <button 
             onClick={handleRestart} 
             className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
@@ -166,10 +163,11 @@ export default function Game() {
       {/* Map always visible, but disables controls except in playing phase */}
       <div className="w-full h-full">
         <GameMap
-          center={playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER}
+          center={phase === "countdown" ? GAME_CONFIG.MAP.DEFAULT_CENTER : (playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER)}
           zoom={18}
           playerPosition={playerPos || undefined}
           imageDimensions={imageDimensions}
+          gamePhase={phase}
           markers={
             phase !== "start"
               ? [
