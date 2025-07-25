@@ -3,15 +3,16 @@ import GameMap from "../components/GameMap";
 import ImagePreloader from "../components/ImagePreloader";
 import { GAME_CONFIG, DROPSITES, DROP_RADIUS } from "../utils/constants";
 import type { Dropsite } from "../utils/types";
+import { getTerrainAt } from "../utils/collisionDetection";
 
 // Game states
 type GamePhase = "start" | "countdown" | "reveal" | "playing" | "victory" | "results";
 
 // Function to select a random dropsite
 const selectRandomDropsite = (): Dropsite => {
-  const debugIndex = 5;
-  // const randomIndex = Math.floor(Math.random() * DROPSITES.length);
-  return DROPSITES[debugIndex];
+  // const debugIndex = 5;
+  const randomIndex = Math.floor(Math.random() * DROPSITES.length);
+  return DROPSITES[randomIndex];
 };
 
 export default function Game() {
@@ -23,10 +24,17 @@ export default function Game() {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(3);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [invalidStart, setInvalidStart] = useState(false);
 
   // Start selection: player clicks map to set start
   const handleMapClick = (position: { x: number; y: number }) => {
     if (phase === "start") {
+      const terrain = getTerrainAt(position.x, position.y);
+      if (terrain.isBlocked) {
+        setInvalidStart(true);
+        return;
+      }
+      setInvalidStart(false);
       setPlayerPos([position.x, position.y]);
     }
   };
@@ -107,6 +115,9 @@ export default function Game() {
         <div className="absolute z-10 top-8 left-1/2 -translate-x-1/2 game-ui-overlay bg-white bg-opacity-90 p-6 rounded-lg shadow-xl text-center">
           <h2 className="text-2xl font-bold mb-2 text-gray-800">Pick your starting point!</h2>
           <p className="text-gray-600">Click anywhere on the map to begin.</p>
+          {invalidStart && (
+            <div className="mt-2 text-red-600 font-semibold">Invalid starting point. Choose another start point.</div>
+          )}
         </div>
       )}
       {phase === "countdown" && (
@@ -163,7 +174,7 @@ export default function Game() {
       {/* Map always visible, but disables controls except in playing phase */}
       <div className="w-full h-full">
         <GameMap
-          center={phase === "countdown" ? GAME_CONFIG.MAP.DEFAULT_CENTER : (playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER)}
+          center={phase === "countdown" ? (playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER) : (playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER)}
           zoom={18}
           playerPosition={playerPos || undefined}
           imageDimensions={imageDimensions}
