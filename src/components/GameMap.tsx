@@ -1,36 +1,17 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+} from "react";
 import ZoomSlider from "./ZoomSlider";
 import {
   useCollisionDetection,
   type UseCollisionDetectionReturn,
 } from "@/hooks/useCollisionDetection";
-
-interface GameMarker {
-  position: [number, number];
-  popup?: string;
-  type?: "player" | "checkpoint" | "obstacle" | "treasure" | "enemy" | "default";
-  color?: string;
-  sprite?: string;
-}
-
-interface ImageDimensions {
-  width: number;
-  height: number;
-  aspectRatio: number;
-}
-
-interface GameMapProps {
-  center?: [number, number];
-  zoom?: number;
-  height?: string;
-  width?: string;
-  markers?: GameMarker[];
-  playerPosition?: [number, number];
-  onMapClick?: (position: { x: number; y: number }) => void;
-  onPlayerMove?: (newPosition: [number, number]) => void;
-  imageDimensions: ImageDimensions;
-  gamePhase?: string;
-}
+import type { ImageDimensions, GameMapProps } from "@/utils/types";
 
 // Optimized WASD Controls with refs instead of state
 function WASDControls({
@@ -44,10 +25,11 @@ function WASDControls({
   imageDimensions: ImageDimensions;
   collision: UseCollisionDetectionReturn;
 }) {
+  // Claude said that keeping it a set is fine since you want multi directional movement
   const keysPressed = useRef<Set<string>>(new Set());
-  const animationFrame = useRef<number | null>(null);
-  const lastUpdate = useRef<number>(performance.now());
-  const playerPosRef = useRef(playerPosition);
+  const animationFrame = useRef<number | null>(null); // Use ref to store animation frame ID
+  const lastUpdate = useRef<number>(performance.now()); // Last update timestamp
+  const playerPosRef = useRef(playerPosition); // Ref to store player position
   const onPlayerMoveRef = useRef(onPlayerMove);
 
   // Update refs when props change
@@ -109,13 +91,39 @@ function WASDControls({
 
           if (!canMove) {
             // Try sliding along obstacles
-            const tryX = Math.max(0, Math.min(imageDimensions.width, currentPlayerPos[0] + normalizedMoveX));
-            const tryY = Math.max(0, Math.min(imageDimensions.height, currentPlayerPos[1] + normalizedMoveY));
+            const tryX = Math.max(
+              0,
+              Math.min(
+                imageDimensions.width,
+                currentPlayerPos[0] + normalizedMoveX
+              )
+            );
+            const tryY = Math.max(
+              0,
+              Math.min(
+                imageDimensions.height,
+                currentPlayerPos[1] + normalizedMoveY
+              )
+            );
 
-            if (collision.checkMovement(currentPlayerPos[0], currentPlayerPos[1], tryX, currentPlayerPos[1])) {
+            if (
+              collision.checkMovement(
+                currentPlayerPos[0],
+                currentPlayerPos[1],
+                tryX,
+                currentPlayerPos[1]
+              )
+            ) {
               newX = tryX;
               newY = currentPlayerPos[1];
-            } else if (collision.checkMovement(currentPlayerPos[0], currentPlayerPos[1], currentPlayerPos[0], tryY)) {
+            } else if (
+              collision.checkMovement(
+                currentPlayerPos[0],
+                currentPlayerPos[1],
+                currentPlayerPos[0],
+                tryY
+              )
+            ) {
               newX = currentPlayerPos[0];
               newY = tryY;
             } else {
@@ -138,7 +146,18 @@ function WASDControls({
       if (e.target instanceof HTMLInputElement) return;
 
       const key = e.key.toLowerCase();
-      if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
+      if (
+        [
+          "w",
+          "a",
+          "s",
+          "d",
+          "arrowup",
+          "arrowleft",
+          "arrowdown",
+          "arrowright",
+        ].includes(key)
+      ) {
         e.preventDefault();
         keysPressed.current.add(key);
         if (!animationFrame.current) {
@@ -159,7 +178,7 @@ function WASDControls({
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
     window.addEventListener("blur", handleBlur);
-    
+
     animationFrame.current = requestAnimationFrame(updatePosition);
 
     return () => {
@@ -176,7 +195,7 @@ function WASDControls({
 }
 
 const GameMap: React.FC<GameMapProps> = ({
-  center = [500, 400],
+  center,
   markers = [],
   playerPosition,
   onMapClick,
@@ -187,30 +206,63 @@ const GameMap: React.FC<GameMapProps> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const collision = useCollisionDetection();
-  
+
+  // Add state to track container dimensions
+  const [containerDimensions, setContainerDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+
   // Single state for zoom with lazy initialization
   const [zoomLevel, setZoomLevel] = useState(() => {
     const savedZoom = localStorage.getItem("petrrun-zoom-level");
     return savedZoom ? parseFloat(savedZoom) : 2.5;
   });
 
-  // Memoized camera transform calculation
+  // Use useLayoutEffect to measure container and update dimensions
+  useLayoutEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const { clientWidth, clientHeight } = containerRef.current;
+        setContainerDimensions((prev) => {
+          if (prev.width !== clientWidth || prev.height !== clientHeight) {
+            return { width: clientWidth, height: clientHeight };
+          }
+          return prev;
+        });
+      }
+    };
+
+    updateDimensions();
+
+    const resizeObserver = new ResizeObserver(updateDimensions);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  // Memoized camera transform calculation using state dimensions
   const cameraTransform = useMemo(() => {
-    if (!containerRef.current) {
+    const { width: containerWidth, height: containerHeight } =
+      containerDimensions;
+
+    // Early return with basic scale if dimensions not available
+    if (containerWidth === 0 || containerHeight === 0) {
       return {
         transform: `scale(${Math.max(zoomLevel * 0.6, 0.5)})`,
         transformOrigin: "0 0",
       };
     }
 
-    const containerWidth = containerRef.current.clientWidth;
-    const containerHeight = containerRef.current.clientHeight;
     const centerX = containerWidth / 2;
     const centerY = containerHeight / 2;
     const scale = zoomLevel;
 
     let targetPosition = center;
-    
     if (gamePhase === "playing" && playerPosition) {
       targetPosition = playerPosition;
     }
@@ -218,49 +270,60 @@ const GameMap: React.FC<GameMapProps> = ({
     const translateX = centerX - targetPosition[0] * scale;
     const translateY = centerY - targetPosition[1] * scale;
 
+    console.log("Camera Transform:", {
+      translateX,
+      translateY,
+      scale,
+      containerWidth,
+      containerHeight,
+    });
+
     return {
       transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
       transformOrigin: "0 0",
       willChange: "transform",
     };
-  }, [zoomLevel, center, playerPosition, gamePhase]);
+  }, [containerDimensions, zoomLevel, center, playerPosition, gamePhase]);
 
-  // Memoized click handler
-  const handleMapClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!onMapClick || !mapRef.current || !containerRef.current) return;
+  // Updated click handler to use state dimensions
+  const handleMapClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!onMapClick || !mapRef.current) return;
+      if (containerDimensions.width === 0 || containerDimensions.height === 0)
+        return;
 
-    const rect = containerRef.current.getBoundingClientRect();
-    const containerX = e.clientX - rect.left;
-    const containerY = e.clientY - rect.top;
+      const rect = containerRef.current!.getBoundingClientRect();
+      const containerX = e.clientX - rect.left;
+      const containerY = e.clientY - rect.top;
+      const { width: containerWidth, height: containerHeight } =
+        containerDimensions;
+      const centerX = containerWidth / 2;
+      const centerY = containerHeight / 2;
 
-    const containerWidth = containerRef.current.clientWidth;
-    const containerHeight = containerRef.current.clientHeight;
-    const centerX = containerWidth / 2;
-    const centerY = containerHeight / 2;
-    const scale = zoomLevel;
+      const translateX = centerX - center[0] * zoomLevel;
+      const translateY = centerY - center[1] * zoomLevel;
 
-    const targetPosition = (gamePhase === "playing" && playerPosition) ? playerPosition : center;
-    const translateX = centerX - targetPosition[0] * scale;
-    const translateY = centerY - targetPosition[1] * scale;
-    
-    const mapX = (containerX - translateX) / scale;
-    const mapY = (containerY - translateY) / scale;
+      const mapX = (containerX - translateX) / zoomLevel;
+      const mapY = (containerY - translateY) / zoomLevel;
 
-    onMapClick({ x: mapX, y: mapY });
-  }, [onMapClick, zoomLevel, center, playerPosition, gamePhase]);
+      onMapClick({ x: mapX, y: mapY });
+    },
+    [onMapClick, center, containerDimensions, zoomLevel]
+  );
 
+  // ... rest of your component remains the same
   // Memoized wheel handler
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoomLevel(prev => Math.max(0.5, Math.min(4, prev + delta)));
+    setZoomLevel((prev) => Math.max(0.5, Math.min(4, prev + delta)));
   }, []);
 
   // Memoized terrain info
   const terrainInfo = useMemo(() => {
     if (!playerPosition || !collision.isLoaded) return null;
     return collision.getTerrainInfo(playerPosition[0], playerPosition[1]);
-  }, [playerPosition, collision.isLoaded, collision]);
+  }, [playerPosition, collision]);
 
   // Single effect for all keyboard shortcuts and zoom persistence
   useEffect(() => {
@@ -270,9 +333,20 @@ const GameMap: React.FC<GameMapProps> = ({
     // Keyboard shortcuts
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
-      
+
       const key = e.key.toLowerCase();
-      if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
+      if (
+        [
+          "w",
+          "a",
+          "s",
+          "d",
+          "arrowup",
+          "arrowleft",
+          "arrowdown",
+          "arrowright",
+        ].includes(key)
+      ) {
         return; // Handled by WASDControls
       }
 
@@ -280,11 +354,11 @@ const GameMap: React.FC<GameMapProps> = ({
         case "=":
         case "+":
           e.preventDefault();
-          setZoomLevel(prev => Math.min(4, prev + 0.2));
+          setZoomLevel((prev) => Math.min(4, prev + 0.2));
           break;
         case "-":
           e.preventDefault();
-          setZoomLevel(prev => Math.max(0.5, prev - 0.2));
+          setZoomLevel((prev) => Math.max(0.5, prev - 0.2));
           break;
         case "0":
           e.preventDefault();
@@ -332,7 +406,7 @@ const GameMap: React.FC<GameMapProps> = ({
         imageDimensions={imageDimensions}
         collision={collision}
       />
-      
+
       <div
         ref={mapRef}
         className="game-map absolute cursor-crosshair"
@@ -345,7 +419,6 @@ const GameMap: React.FC<GameMapProps> = ({
           width: `${imageDimensions.width}px`,
           height: `${imageDimensions.height}px`,
           backfaceVisibility: "hidden",
-          imageRendering: "auto",
           ...cameraTransform,
         }}
       >

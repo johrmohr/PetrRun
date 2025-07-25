@@ -85,3 +85,36 @@ export interface Dropsite {
   difficulty: "easy" | "medium" | "hard";
   description: string;
 }
+
+export interface GameMarker {
+  position: [number, number];
+  popup?: string;
+  type?:
+    | "player"
+    | "checkpoint"
+    | "obstacle"
+    | "treasure"
+    | "enemy"
+    | "default";
+  color?: string;
+  sprite?: string;
+}
+
+export interface ImageDimensions {
+  width: number;
+  height: number;
+  aspectRatio: number;
+}
+
+export interface GameMapProps {
+  center: [number, number];
+  zoom?: number;
+  height?: string;
+  width?: string;
+  markers?: GameMarker[];
+  playerPosition?: [number, number];
+  onMapClick?: (position: { x: number; y: number }) => void;
+  onPlayerMove?: (newPosition: [number, number]) => void;
+  imageDimensions: ImageDimensions;
+  gamePhase?: string;
+}
