@@ -163,7 +163,7 @@ export default function Game() {
       {/* Map always visible, but disables controls except in playing phase */}
       <div className="w-full h-full">
         <GameMap
-          center={phase === "countdown" ? GAME_CONFIG.MAP.DEFAULT_CENTER : (playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER)}
+          center={playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER}
           zoom={18}
           playerPosition={playerPos || undefined}
           imageDimensions={imageDimensions}
