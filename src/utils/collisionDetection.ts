@@ -1,7 +1,7 @@
 /**
  * Collision Detection System for PetrRun
  * Reads a collision map to determine movement speeds and blocked areas
- * 
+ *
  * Color coding:
  * - Red (255,0,0): Unreachable areas (blocked)
  * - Green (0,255,0): Fastest movement (1.5x speed)
@@ -22,7 +22,7 @@ export interface CollisionData {
 export interface TerrainInfo {
   isBlocked: boolean;
   speedMultiplier: number;
-  terrainType: 'blocked' | 'fast' | 'grass' | 'stairs' | 'normal';
+  terrainType: "blocked" | "fast" | "grass" | "stairs" | "normal";
 }
 
 // Global collision data instance
@@ -32,7 +32,7 @@ let collisionData: CollisionData = {
   context: null,
   imageData: null,
   width: 0,
-  height: 0
+  height: 0,
 };
 
 /**
@@ -41,49 +41,51 @@ let collisionData: CollisionData = {
 export async function loadCollisionMap(): Promise<CollisionData> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    
+
     img.onload = () => {
       try {
         // Create a canvas to read pixel data
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
         if (!ctx) {
-          throw new Error('Could not get canvas context');
+          throw new Error("Could not get canvas context");
         }
-        
+
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
-        
+
         // Draw the collision map to the canvas
         ctx.drawImage(img, 0, 0);
-        
+
         // Get the image data for pixel reading
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        
+
         collisionData = {
           isLoaded: true,
           canvas,
           context: ctx,
           imageData,
           width: canvas.width,
-          height: canvas.height
+          height: canvas.height,
         };
-        
-        console.log(`🗺️ Collision map loaded: ${canvas.width}x${canvas.height} pixels`);
+
+        console.log(
+          `🗺️ Collision map loaded: ${canvas.width}x${canvas.height} pixels`
+        );
         resolve(collisionData);
       } catch (error) {
-        console.error('Failed to process collision map:', error);
+        console.error("Failed to process collision map:", error);
         reject(error);
       }
     };
-    
+
     img.onerror = () => {
-      console.error('Failed to load collision map image');
-      reject(new Error('Failed to load collision map image'));
+      console.error("Failed to load collision map image");
+      reject(new Error("Failed to load collision map image"));
     };
-    
-    img.src = '/UCI_collision_map.png';
+
+    img.src = "/UCI_collision_map.png";
   });
 }
 
@@ -92,25 +94,31 @@ export async function loadCollisionMap(): Promise<CollisionData> {
  */
 export function getTerrainAt(x: number, y: number): TerrainInfo {
   if (!collisionData.isLoaded || !collisionData.imageData) {
-    return { isBlocked: false, speedMultiplier: 1.0, terrainType: 'normal' };
+    return { isBlocked: false, speedMultiplier: 1.0, terrainType: "normal" };
   }
-  
+
   // Clamp coordinates to image bounds
-  const clampedX = Math.max(0, Math.min(Math.floor(x), collisionData.width - 1));
-  const clampedY = Math.max(0, Math.min(Math.floor(y), collisionData.height - 1));
-  
+  const clampedX = Math.max(
+    0,
+    Math.min(Math.floor(x), collisionData.width - 1)
+  );
+  const clampedY = Math.max(
+    0,
+    Math.min(Math.floor(y), collisionData.height - 1)
+  );
+
   // Calculate pixel index (RGBA format)
   const index = (clampedY * collisionData.width + clampedX) * 4;
   const data = collisionData.imageData.data;
-  
+
   if (index >= data.length) {
-    return { isBlocked: false, speedMultiplier: 1.0, terrainType: 'normal' };
+    return { isBlocked: false, speedMultiplier: 1.0, terrainType: "normal" };
   }
-  
+
   const r = data[index];
   const g = data[index + 1];
   const b = data[index + 2];
-  
+
   return analyzePixelColor(r, g, b);
 }
 
@@ -120,42 +128,47 @@ export function getTerrainAt(x: number, y: number): TerrainInfo {
 function analyzePixelColor(r: number, g: number, b: number): TerrainInfo {
   // Define color thresholds for fuzzy matching
   const threshold = 30;
-  
+
   // Red (blocked areas)
   if (r > 200 && g < threshold && b < threshold) {
-    return { isBlocked: true, speedMultiplier: 0, terrainType: 'blocked' };
+    return { isBlocked: true, speedMultiplier: 0, terrainType: "blocked" };
   }
-  
+
   // Green (fast areas)
   if (g > 200 && r < threshold && b < threshold) {
-    return { isBlocked: false, speedMultiplier: 1.5, terrainType: 'fast' };
+    return { isBlocked: false, speedMultiplier: 1.5, terrainType: "fast" };
   }
-  
+
   // Yellow (grass - slower)
   if (r > 200 && g > 200 && b < threshold) {
-    return { isBlocked: false, speedMultiplier: 0.7, terrainType: 'grass' };
+    return { isBlocked: false, speedMultiplier: 0.7, terrainType: "grass" };
   }
-  
+
   // Orange (stairs - slowest)
   if (r > 200 && g > 100 && g < 200 && b < threshold) {
-    return { isBlocked: false, speedMultiplier: 0.3, terrainType: 'stairs' };
+    return { isBlocked: false, speedMultiplier: 0.3, terrainType: "stairs" };
   }
-  
+
   // Default (normal speed)
-  return { isBlocked: false, speedMultiplier: 1.0, terrainType: 'normal' };
+  return { isBlocked: false, speedMultiplier: 1.0, terrainType: "normal" };
 }
 
 /**
  * Check if a movement from one position to another is valid
  */
-export function isMovementValid(fromX: number, fromY: number, toX: number, toY: number): boolean {
+export function isMovementValid(
+  fromX: number,
+  fromY: number,
+  toX: number,
+  toY: number
+): boolean {
   // Check the destination terrain
   const destinationTerrain = getTerrainAt(toX, toY);
-  
+
   if (destinationTerrain.isBlocked) {
     return false;
   }
-  
+
   // For more precision, we could check intermediate points along the path
   // For now, just check the destination
   return true;
@@ -164,7 +177,11 @@ export function isMovementValid(fromX: number, fromY: number, toX: number, toY: 
 /**
  * Get the effective movement speed at a position
  */
-export function getMovementSpeed(x: number, y: number, baseSpeed: number): number {
+export function getMovementSpeed(
+  x: number,
+  y: number,
+  baseSpeed: number
+): number {
   const terrain = getTerrainAt(x, y);
   return baseSpeed * terrain.speedMultiplier;
 }
@@ -185,7 +202,7 @@ export async function initializeCollisionDetection(): Promise<boolean> {
     await loadCollisionMap();
     return true;
   } catch (error) {
-    console.error('Failed to initialize collision detection:', error);
+    console.error("Failed to initialize collision detection:", error);
     return false;
   }
-} 
+}

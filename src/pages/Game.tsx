@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import GameMap from "../components/GameMap";
 import ImagePreloader from "../components/ImagePreloader";
-import { GAME_CONFIG, DROPSITES, DROP_RADIUS } from "../utils/constants";
+import { GAME_CONFIG, DROPSITES, DROP_RADIUS, stickerUrls } from "../utils/constants";
 import type { Dropsite } from "../utils/types";
 
 // Game states
@@ -15,10 +15,16 @@ type GamePhase =
 
 // Function to select a random dropsite
 const selectRandomDropsite = (): Dropsite => {
-  const debugIndex = 5;
-  // const randomIndex = Math.floor(Math.random() * DROPSITES.length);
-  return DROPSITES[debugIndex];
+  const randomIndex = Math.floor(Math.random() * DROPSITES.length);
+  return DROPSITES[randomIndex];
 };
+
+function getRandomSticker() {
+  const randomIndex = Math.floor(Math.random() * stickerUrls.length);
+  return stickerUrls[randomIndex];
+}
+
+const randomSticker = getRandomSticker();
 
 export default function Game() {
   // State
@@ -208,6 +214,7 @@ export default function Game() {
                         type: "treasure",
                         popup: `${currentDropsite.name} - Petr Drop!`,
                         color: "#ffa500",
+                        sprite: randomSticker,
                       },
                     ]
                   : []

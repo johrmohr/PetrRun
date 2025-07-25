@@ -1,12 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import ZoomSlider from "./ZoomSlider";
-import { useCollisionDetection, type UseCollisionDetectionReturn } from "../hooks/useCollisionDetection";
+import {
+  useCollisionDetection,
+  type UseCollisionDetectionReturn,
+} from "../hooks/useCollisionDetection";
 
 interface GameMarker {
   position: [number, number]; // [x, y] pixels
   popup?: string;
-  type?: "player" | "checkpoint" | "obstacle" | "treasure" | "enemy" | "default";
+  type?:
+    | "player"
+    | "checkpoint"
+    | "obstacle"
+    | "treasure"
+    | "enemy"
+    | "default";
   color?: string;
+  sprite?: string; // URL to sprite image
 }
 
 interface ImageDimensions {
@@ -31,7 +41,6 @@ interface GameMapProps {
 function WASDControls({
   onPlayerMove,
   playerPosition,
-  mapRef,
   imageDimensions,
   collision,
 }: {
@@ -46,7 +55,10 @@ function WASDControls({
   const lastUpdate = useRef<number>(performance.now());
 
   useEffect(() => {
-    console.log("WASDControls: useEffect mounted", { playerPosition, onPlayerMove: !!onPlayerMove });
+    console.log("WASDControls: useEffect mounted", {
+      playerPosition,
+      onPlayerMove: !!onPlayerMove,
+    });
 
     const updatePosition = (timestamp: number) => {
       if (!playerPosition || !onPlayerMove) {
@@ -63,7 +75,11 @@ function WASDControls({
 
       const baseMoveSpeed = 150; // Pixels per second (reduced from 300)
       const currentSpeed = collision.isLoaded
-        ? collision.calculateSpeed(playerPosition[0], playerPosition[1], baseMoveSpeed)
+        ? collision.calculateSpeed(
+            playerPosition[0],
+            playerPosition[1],
+            baseMoveSpeed
+          )
         : baseMoveSpeed;
 
       let moveX = 0;
@@ -73,13 +89,22 @@ function WASDControls({
       if (keysPressed.current.has("w") || keysPressed.current.has("arrowup")) {
         moveY -= 1;
       }
-      if (keysPressed.current.has("s") || keysPressed.current.has("arrowdown")) {
+      if (
+        keysPressed.current.has("s") ||
+        keysPressed.current.has("arrowdown")
+      ) {
         moveY += 1;
       }
-      if (keysPressed.current.has("a") || keysPressed.current.has("arrowleft")) {
+      if (
+        keysPressed.current.has("a") ||
+        keysPressed.current.has("arrowleft")
+      ) {
         moveX -= 1;
       }
-      if (keysPressed.current.has("d") || keysPressed.current.has("arrowright")) {
+      if (
+        keysPressed.current.has("d") ||
+        keysPressed.current.has("arrowright")
+      ) {
         moveX += 1;
       }
 
@@ -102,7 +127,12 @@ function WASDControls({
 
         // Handle collision
         if (collision.isLoaded) {
-          const canMove = collision.checkMovement(playerPosition[0], playerPosition[1], newX, newY);
+          const canMove = collision.checkMovement(
+            playerPosition[0],
+            playerPosition[1],
+            newX,
+            newY
+          );
           console.log("WASDControls: Collision check", {
             from: playerPosition,
             to: [newX, newY],
@@ -111,13 +141,39 @@ function WASDControls({
 
           if (!canMove) {
             // Try moving only in X or Y direction to allow sliding along obstacles
-            const tryX = Math.max(0, Math.min(imageDimensions.width, playerPosition[0] + normalizedMoveX));
-            const tryY = Math.max(0, Math.min(imageDimensions.height, playerPosition[1] + normalizedMoveY));
+            const tryX = Math.max(
+              0,
+              Math.min(
+                imageDimensions.width,
+                playerPosition[0] + normalizedMoveX
+              )
+            );
+            const tryY = Math.max(
+              0,
+              Math.min(
+                imageDimensions.height,
+                playerPosition[1] + normalizedMoveY
+              )
+            );
 
-            if (collision.checkMovement(playerPosition[0], playerPosition[1], tryX, playerPosition[1])) {
+            if (
+              collision.checkMovement(
+                playerPosition[0],
+                playerPosition[1],
+                tryX,
+                playerPosition[1]
+              )
+            ) {
               newX = tryX;
               newY = playerPosition[1];
-            } else if (collision.checkMovement(playerPosition[0], playerPosition[1], playerPosition[0], tryY)) {
+            } else if (
+              collision.checkMovement(
+                playerPosition[0],
+                playerPosition[1],
+                playerPosition[0],
+                tryY
+              )
+            ) {
               newX = playerPosition[0];
               newY = tryY;
             } else {
@@ -149,7 +205,18 @@ function WASDControls({
       if (e.target instanceof HTMLInputElement) return;
 
       const key = e.key.toLowerCase();
-      if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
+      if (
+        [
+          "w",
+          "a",
+          "s",
+          "d",
+          "arrowup",
+          "arrowleft",
+          "arrowdown",
+          "arrowright",
+        ].includes(key)
+      ) {
         e.preventDefault();
         if (!keysPressed.current.has(key)) {
           keysPressed.current.add(key);
@@ -210,8 +277,6 @@ const GameMap: React.FC<GameMapProps> = ({
   playerPosition,
   onMapClick,
   onPlayerMove,
-  height = "100%",
-  width = "100%",
   imageDimensions,
   gamePhase,
 }) => {
@@ -219,68 +284,67 @@ const GameMap: React.FC<GameMapProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const collision = useCollisionDetection();
   const [zoomLevel, setZoomLevel] = useState(() => {
-    const savedZoom = localStorage.getItem('petrrun-zoom-level');
+    const savedZoom = localStorage.getItem("petrrun-zoom-level");
     return savedZoom ? parseFloat(savedZoom) : 2.5;
   });
 
   useEffect(() => {
     if (collision.isLoaded && !collision.isLoading) {
-      console.log('🎯 Auto-center fix triggered! Collision map loaded:', collision.isLoaded);
-      const originalZoom = zoomLevel;
-      console.log('📊 Original zoom level:', originalZoom);
-      const zoomIn = originalZoom + 1;
-      console.log('🔍 Step 1: Zooming IN to', zoomIn);
-      setZoomLevel(zoomIn);
-      setTimeout(() => {
-        const zoomOut = originalZoom - 1;
-        console.log('🔍 Step 2: Zooming OUT to', zoomOut);
-        setZoomLevel(zoomOut);
-        setTimeout(() => {
-          console.log('🔍 Step 3: Returning to original zoom', originalZoom);
-          setZoomLevel(0.7);
-          console.log('✅ Auto-center fix complete!');
-        }, 50);
-      }, 50);
+      console.log(
+        "🎯 Auto-center fix triggered! Collision map loaded:",
+        collision.isLoaded
+      );
     }
   }, [collision.isLoaded, collision.isLoading]);
 
   useEffect(() => {
-    localStorage.setItem('petrrun-zoom-level', zoomLevel.toString());
+    localStorage.setItem("petrrun-zoom-level", zoomLevel.toString());
   }, [zoomLevel]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
       const key = e.key.toLowerCase();
-      if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
+      if (
+        [
+          "w",
+          "a",
+          "s",
+          "d",
+          "arrowup",
+          "arrowleft",
+          "arrowdown",
+          "arrowright",
+        ].includes(key)
+      ) {
         return;
       }
       switch (e.key) {
-        case '=':
-        case '+':
+        case "=":
+        case "+":
           e.preventDefault();
-          setZoomLevel(prev => Math.min(4, prev + 0.2));
+          setZoomLevel((prev) => Math.min(4, prev + 0.2));
           break;
-        case '-':
+        case "-":
           e.preventDefault();
-          setZoomLevel(prev => Math.max(0.5, prev - 0.2));
+          setZoomLevel((prev) => Math.max(0.5, prev - 0.2));
           break;
-        case '0':
+        case "0":
           e.preventDefault();
           setZoomLevel(2.5);
           break;
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const getCameraTransform = () => {
     if (!containerRef.current) {
       return {
         transform: `scale(${Math.max(zoomLevel * 0.6, 0.5)})`,
-        transformOrigin: '0 0'
+        transformOrigin: "0 0",
       };
     }
 
@@ -291,33 +355,33 @@ const GameMap: React.FC<GameMapProps> = ({
     const scale = zoomLevel;
 
     if (gamePhase === "countdown") {
-      const translateX = centerX - (center[0] * scale);
-      const translateY = centerY - (center[1] * scale);
+      const translateX = centerX - center[0] * scale;
+      const translateY = centerY - center[1] * scale;
       return {
         transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
-        transformOrigin: '0 0',
-        willChange: 'transform',
+        transformOrigin: "0 0",
+        willChange: "transform",
       };
     }
 
     if (playerPosition && gamePhase === "playing") {
-      const translateX = centerX - (playerPosition[0] * scale);
-      const translateY = centerY - (playerPosition[1] * scale);
+      const translateX = centerX - playerPosition[0] * scale;
+      const translateY = centerY - playerPosition[1] * scale;
       return {
         transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
-        transformOrigin: '0 0',
-        willChange: 'transform',
+        transformOrigin: "0 0",
+        willChange: "transform",
       };
     }
 
     const targetPosition = playerPosition || center;
-    const translateX = centerX - (targetPosition[0] * scale);
-    const translateY = centerY - (targetPosition[1] * scale);
+    const translateX = centerX - targetPosition[0] * scale;
+    const translateY = centerY - targetPosition[1] * scale;
 
     return {
       transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
-      transformOrigin: '0 0',
-      willChange: 'transform',
+      transformOrigin: "0 0",
+      willChange: "transform",
     };
   };
 
@@ -336,24 +400,34 @@ const GameMap: React.FC<GameMapProps> = ({
 
     let mapX, mapY;
     if (gamePhase === "countdown") {
-      const translateX = centerX - (center[0] * scale);
-      const translateY = centerY - (center[1] * scale);
+      const translateX = centerX - center[0] * scale;
+      const translateY = centerY - center[1] * scale;
       mapX = (containerX - translateX) / scale;
       mapY = (containerY - translateY) / scale;
     } else if (playerPosition && gamePhase === "playing") {
-      const translateX = centerX - (playerPosition[0] * scale);
-      const translateY = centerY - (playerPosition[1] * scale);
+      const translateX = centerX - playerPosition[0] * scale;
+      const translateY = centerY - playerPosition[1] * scale;
       mapX = (containerX - translateX) / scale;
       mapY = (containerY - translateY) / scale;
     } else {
       const targetPosition = playerPosition || center;
-      const translateX = centerX - (targetPosition[0] * scale);
-      const translateY = centerY - (targetPosition[1] * scale);
+      const translateX = centerX - targetPosition[0] * scale;
+      const translateY = centerY - targetPosition[1] * scale;
       mapX = (containerX - translateX) / scale;
       mapY = (containerY - translateY) / scale;
     }
 
-    console.log('🖱️ Click at screen:', containerX, containerY, '→ Map:', mapX, mapY, '(scale:', scale, ')');
+    console.log(
+      "🖱️ Click at screen:",
+      containerX,
+      containerY,
+      "→ Map:",
+      mapX,
+      mapY,
+      "(scale:",
+      scale,
+      ")"
+    );
     onMapClick({ x: mapX, y: mapY });
   };
 
@@ -382,12 +456,12 @@ const GameMap: React.FC<GameMapProps> = ({
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoomLevel(prev => Math.max(0.5, Math.min(4, prev + delta)));
+    setZoomLevel((prev) => Math.max(0.5, Math.min(4, prev + delta)));
   };
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className="relative w-full h-full overflow-hidden bg-gray-200"
       onWheel={handleWheel}
     >
@@ -410,8 +484,8 @@ const GameMap: React.FC<GameMapProps> = ({
           width: `${imageDimensions.width}px`,
           height: `${imageDimensions.height}px`,
           backfaceVisibility: "hidden",
-          imageRendering: 'auto',
-          ...getCameraTransform()
+          imageRendering: "auto",
+          ...getCameraTransform(),
         }}
       >
         {markers.map((marker, index) => (
@@ -423,20 +497,11 @@ const GameMap: React.FC<GameMapProps> = ({
               top: marker.position[1] - 8,
             }}
           >
-            <div
-              className="w-4 h-4 border-2 border-white rounded-full shadow-lg flex items-center justify-center"
-              style={{
-                backgroundColor: marker.color || "#ffa500",
-              }}
-              title={marker.popup}
-            >
-              <div className="w-1 h-1 bg-white rounded-full"></div>
-            </div>
-            {marker.popup && (
-              <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity">
-                {marker.popup}
-              </div>
-            )}
+            <img
+              src={marker.sprite}
+              alt="Marker"
+              className="w-8 h-8 object-contain"
+            />
           </div>
         ))}
       </div>
@@ -444,19 +509,19 @@ const GameMap: React.FC<GameMapProps> = ({
         <div
           className="absolute z-20 pointer-events-none"
           style={{
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            willChange: 'transform',
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            willChange: "transform",
           }}
         >
-          <img 
-            src="/stickers/Trombone_petr.png" 
-            alt="Player" 
+          <img
+            src="/stickers/Trombone_petr.png"
+            alt="Player"
             className="w-16 h-16 object-contain drop-shadow-lg"
             style={{
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
-              imageRendering: 'pixelated',
+              filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
+              imageRendering: "pixelated",
             }}
           />
         </div>
@@ -469,7 +534,9 @@ const GameMap: React.FC<GameMapProps> = ({
       <div className="absolute bottom-4 left-4 bg-black bg-opacity-70 text-white text-sm px-3 py-2 rounded backdrop-blur z-30">
         <div className="space-y-1">
           <div>
-            {onPlayerMove ? "Use WASD to move • Map follows you" : "Click to select start position"}
+            {onPlayerMove
+              ? "Use WASD to move • Map follows you"
+              : "Click to select start position"}
           </div>
           <div className="text-xs opacity-75">
             Zoom: Mouse wheel or +/- keys • Reset: 0 key
@@ -478,17 +545,21 @@ const GameMap: React.FC<GameMapProps> = ({
             <div className="text-xs opacity-75 flex items-center gap-2">
               <span>Terrain:</span>
               {(() => {
-                const terrain = collision.getTerrainInfo(playerPosition[0], playerPosition[1]);
+                const terrain = collision.getTerrainInfo(
+                  playerPosition[0],
+                  playerPosition[1]
+                );
                 const terrainIcon = {
-                  'blocked': '🚫',
-                  'fast': '🟢',
-                  'grass': '🟡',
-                  'stairs': '🟠',
-                  'normal': '⚪'
+                  blocked: "🚫",
+                  fast: "🟢",
+                  grass: "🟡",
+                  stairs: "🟠",
+                  normal: "⚪",
                 }[terrain.terrainType];
-                const speedText = terrain.terrainType === 'blocked' 
-                  ? 'Blocked' 
-                  : `${Math.round(terrain.speedMultiplier * 100)}% speed`;
+                const speedText =
+                  terrain.terrainType === "blocked"
+                    ? "Blocked"
+                    : `${Math.round(terrain.speedMultiplier * 100)}% speed`;
                 return (
                   <span className="flex items-center gap-1">
                     {terrainIcon}

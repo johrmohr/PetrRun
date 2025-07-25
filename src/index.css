@@ -17,28 +17,37 @@
 
 /* Player marker animations - Updated for Trombone Petr image */
 @keyframes playerBounce {
-  0%, 100% { 
-    transform: translateY(0px) scale(1); 
+
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
   }
-  50% { 
-    transform: translateY(-2px) scale(1.05); 
+
+  50% {
+    transform: translateY(-2px) scale(1.05);
   }
 }
 
 @keyframes playerGlow {
-  0%, 100% {
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+
+  0%,
+  100% {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   }
+
   50% {
-    filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.7)) drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.7)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   }
 }
 
 /* Treasure marker glow */
 @keyframes treasureGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
   }
+
   50% {
     box-shadow: 0 0 20px rgba(255, 165, 0, 0.8), 0 0 30px rgba(255, 165, 0, 0.6);
   }
@@ -49,7 +58,7 @@
   animation: playerBounce 1.5s infinite ease-in-out, playerGlow 2s infinite;
 }
 
-.game-map .z-10 > div[style*="rgb(255, 165, 0)"] {
+.game-map .z-10>div[style*="rgb(255, 165, 0)"] {
   animation: treasureGlow 2s infinite;
 }
 
@@ -109,7 +118,7 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 50%;
   background: #3b82f6;
   border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -117,7 +126,7 @@ input[type="range"]::-webkit-slider-thumb {
 input[type="range"]::-webkit-slider-thumb:hover {
   background: #2563eb;
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 input[type="range"]::-moz-range-track {
@@ -133,7 +142,7 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 50%;
   background: #3b82f6;
   border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -141,14 +150,17 @@ input[type="range"]::-moz-range-thumb {
 input[type="range"]::-moz-range-thumb:hover {
   background: #2563eb;
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Zoom slider animation */
 @keyframes zoomPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
