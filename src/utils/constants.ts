@@ -8,29 +8,29 @@ export const stickerUrls = [
 // Available drop sites for random selection (pixel coordinates [x, y])
 export const DROPSITES = [
   {
-    id: "space-explorr",
+    id: "bio-sci",
     name: "Space Exploration Center",
     photo: "/Locations/Bio_Sci_Garden.png",
-    location: [2000, 819] as [number, number], // Scaled from [800, 600] for 5000x3517 map
+    location: [2115, 1410] as [number, number], // Scaled from [800, 600] for 5000x3517 map
     difficulty: "medium",
     description:
-      "The iconic space exploration center where Petr dreams of the stars",
+      "The funny green building...",
   },
   {
-    id: "thanos-statue",
+    id: "social-science-plaza",
     name: "Social Science Plaza",
     photo: "/Locations/Social_Science_Plaza.png",
     location: [2825, 1225] as [number, number], // Scaled from [1200, 400] for 5000x3517 map
     difficulty: "hard",
-    description: "A plaza where Petr connects the dots between humans and history",
+    description: "The spot where UCI's famous dance teams gather",
   },
   {
     id: "music-pavilion",
-    name: "Humanities Bridge",
+    name: "Trombone Performance Stage",
     photo: "/Locations/Humanities_Bridge.png",
-    location: [1500, 2198] as [number, number], // Scaled from [600, 1000] for 5000x3517 map
+    location: [2218, 938] as [number, number], // Scaled from [600, 1000] for 5000x3517 map
     difficulty: "easy",
-    description: "The bridge Petr takes to get to his classes",
+    description: "Where Petr practices his musical talents",
   },
   {
     id: "aldrich-park",
@@ -38,15 +38,15 @@ export const DROPSITES = [
     photo: "/Locations/University_Club.png",
     location: [2438, 1709] as [number, number], // Scaled from [1000, 800] for 5000x3517 map
     difficulty: "medium",
-    description: "A wonderful venue where some couples get married",
+    description: "The place where lovebird alumni make their promises",
   },
   {
-    id: "engineering-tower",
+    id: "sci-lib-rear",
     name: "Back of Science Library",
     photo: "/Locations/Back_of_Sci_Lib.png",
-    location: [1856, 1358] as [number, number], // Scaled from [1400, 300] for 5000x3517 map
+    location: [1898, 1360] as [number, number], // Scaled from [1400, 300] for 5000x3517 map
     difficulty: "hard",
-    description: "The tallest structure visible from across campus",
+    description: "12 statues, hidden away on the edge of inner campus",
   },
   {
     id: "student-center",
