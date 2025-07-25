@@ -26,6 +26,7 @@ interface GameMapProps {
   onPlayerMove?: (newPosition: [number, number]) => void;
   imageDimensions: ImageDimensions;
   gamePhase?: string;
+  onStartError?: (msg: string | null) => void;
 }
 
 function WASDControls({
@@ -214,6 +215,7 @@ const GameMap: React.FC<GameMapProps> = ({
   width = "100%",
   imageDimensions,
   gamePhase,
+  onStartError,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -321,6 +323,7 @@ const GameMap: React.FC<GameMapProps> = ({
     };
   };
 
+  // Handle map clicks (adjust for zoom and translation) - using exact same logic as getCameraTransform
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!onMapClick || !mapRef.current || !containerRef.current) return;
 
@@ -332,8 +335,8 @@ const GameMap: React.FC<GameMapProps> = ({
     const containerHeight = containerRef.current.clientHeight;
     const centerX = containerWidth / 2;
     const centerY = containerHeight / 2;
-    const scale = zoomLevel;
-
+    const scale = zoomLevel; // Use exact same scale as camera transform
+    
     let mapX, mapY;
     if (gamePhase === "countdown") {
       const translateX = centerX - (center[0] * scale);
@@ -351,6 +354,17 @@ const GameMap: React.FC<GameMapProps> = ({
       const translateY = centerY - (targetPosition[1] * scale);
       mapX = (containerX - translateX) / scale;
       mapY = (containerY - translateY) / scale;
+    }
+
+    // Check for invalid start location (only during countdown phase)
+    if (gamePhase === "countdown" && collision.isLoaded) {
+      const terrain = collision.getTerrainInfo(mapX, mapY);
+      if (terrain.terrainType === 'blocked') {
+        if (onStartError) onStartError("Invalid start location. Choose another.");
+        return;
+      } else {
+        if (onStartError) onStartError(null);
+      }
     }
 
     console.log('🖱️ Click at screen:', containerX, containerY, '→ Map:', mapX, mapY, '(scale:', scale, ')');
@@ -466,6 +480,7 @@ const GameMap: React.FC<GameMapProps> = ({
         onZoomChange={setZoomLevel}
         className="absolute top-4 right-4 z-30"
       />
+      {/* Instructions outside the transformed map */}
       <div className="absolute bottom-4 left-4 bg-black bg-opacity-70 text-white text-sm px-3 py-2 rounded backdrop-blur z-30">
         <div className="space-y-1">
           <div>
@@ -474,6 +489,7 @@ const GameMap: React.FC<GameMapProps> = ({
           <div className="text-xs opacity-75">
             Zoom: Mouse wheel or +/- keys • Reset: 0 key
           </div>
+          {/* Terrain indicator */}
           {playerPosition && collision.isLoaded && (
             <div className="text-xs opacity-75 flex items-center gap-2">
               <span>Terrain:</span>
