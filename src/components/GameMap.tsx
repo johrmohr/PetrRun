@@ -465,7 +465,7 @@ const GameMap: React.FC<GameMapProps> = ({
         <div className="space-y-1">
           <div>
             {onPlayerMove
-              ? "Use WASD to move • Map follows you"
+              ? "Use WASD to move"
               : "Click to select start position"}
           </div>
           <div className="text-xs opacity-75">

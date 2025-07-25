@@ -22,15 +22,15 @@ export const DROPSITES = [
     photo: "/Locations/Social_Science_Plaza.png",
     location: [2825, 1225] as [number, number], // Scaled from [1200, 400] for 5000x3517 map
     difficulty: "hard",
-    description: "A mysterious purple structure that appeared overnight",
+    description: "A plaza where Petr connects the dots between humans and history",
   },
   {
     id: "music-pavilion",
-    name: "Trombone Performance Stage",
+    name: "Humanities Bridge",
     photo: "/Locations/Humanities_Bridge.png",
     location: [1500, 2198] as [number, number], // Scaled from [600, 1000] for 5000x3517 map
     difficulty: "easy",
-    description: "Where Petr practices his musical talents",
+    description: "The bridge Petr takes to get to his classes",
   },
   {
     id: "aldrich-park",
@@ -38,7 +38,7 @@ export const DROPSITES = [
     photo: "/Locations/University_Club.png",
     location: [2438, 1709] as [number, number], // Scaled from [1000, 800] for 5000x3517 map
     difficulty: "medium",
-    description: "The heart of campus where students gather",
+    description: "A wonderful venue where some couples get married",
   },
   {
     id: "engineering-tower",

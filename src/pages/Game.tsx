@@ -67,9 +67,12 @@ export default function Game() {
         const id = setTimeout(() => setCountdown((c) => c - 1), 1000);
         return () => clearTimeout(id);
       } else {
-        // Go directly to playing phase after countdown
-        setPhase("playing");
-        setStartTime(Date.now());
+        // Show ZOT! for 1 second before starting
+        const zotTimeout = setTimeout(() => {
+          setPhase("playing");
+          setStartTime(Date.now());
+        }, 1000);
+        return () => clearTimeout(zotTimeout);
       }
     }
   }, [phase, countdown]);
@@ -135,42 +138,33 @@ export default function Game() {
             </div>
           )}
           {phase === "countdown" && (
-            <div className="absolute z-10 top-4 left-4 game-ui-overlay bg-white bg-opacity-95 p-8 rounded-lg shadow-xl text-center">
+            <div className="absolute z-10 top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 game-ui-overlay bg-white bg-opacity-95 p-6 rounded-lg shadow-xl text-center">
               <div className="text-5xl font-bold text-blue-600">
                 {countdown > 0 ? countdown : "🎯 ZOT!"}
               </div>
             </div>
           )}
           {phase === "playing" && (
-            <div className="absolute z-10 top-4 left-4 game-ui-overlay bg-white bg-opacity-95 p-6 rounded-lg shadow-xl">
-              <div className="flex items-center gap-6">
-                {/* Photo on the left */}
-                <div className="flex-shrink-0">
-                  <h3 className="text-lg font-bold mb-2 text-gray-800">
-                    Find this location!
-                  </h3>
-                  <img
-                    src={currentDropsite.photo}
-                    alt="Drop site"
-                    className="w-48 h-48 object-contain rounded-lg shadow-md"
-                  />
-                  <p className="text-sm text-gray-600 mt-2">
-                    {currentDropsite.description}
-                  </p>
-                  {/* Difficulty label hidden as requested */}
-                </div>
-                {/* Timer and info on the right */}
-                <div className="flex flex-col items-center">
-                  <div className="text-3xl font-mono font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
-                    {(timer / 1000).toFixed(2)}s
-                  </div>
-                  <p className="text-sm text-gray-600 mt-2">Use WASD to move</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Find the drop location!
-                  </p>
+            <>
+              <div className="absolute z-10 top-4 left-1/2 -translate-x-1/2 bg-white bg-opacity-95 px-6 py-2 rounded-lg shadow-xl text-center">
+                <div className="text-2xl font-mono font-bold text-blue-600 bg-blue-50 px-4 py-1 rounded-lg">
+                  {(timer / 1000).toFixed(2)}s
                 </div>
               </div>
-            </div>
+              <div className="absolute z-10 top-4 left-4 game-ui-overlay bg-white bg-opacity-95 px-3 py-2 rounded-lg shadow-xl">
+                <div className="flex flex-col items-start">
+                  <h3 className="text-base font-bold mb-2 text-gray-800">Find this location!</h3>
+                  <div className="flex flex-col items-center max-w-xs w-full">
+                    <img
+                      src={currentDropsite.photo}
+                      alt="Drop site"
+                      className="w-full max-w-xs h-auto object-contain rounded-lg shadow-md"
+                    />
+                    <p className="text-xs text-gray-600 mt-2 text-center w-full break-words max-w-full">{currentDropsite.description}</p>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
           {phase === "victory" && (
             <div className="absolute z-10 top-4 left-4 game-ui-overlay bg-green-50 bg-opacity-95 border-2 border-green-200 p-6 rounded-lg shadow-xl text-center">
