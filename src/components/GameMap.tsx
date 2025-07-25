@@ -217,7 +217,7 @@ const GameMap: React.FC<GameMapProps> = ({
   // Single state for zoom with lazy initialization
   const [zoomLevel, setZoomLevel] = useState(() => {
     const savedZoom = localStorage.getItem("petrrun-zoom-level");
-    return savedZoom ? parseFloat(savedZoom) : 2.3;
+    return savedZoom ? parseFloat(savedZoom) : 1.7;
   });
 
   // Use useLayoutEffect to measure container and update dimensions
