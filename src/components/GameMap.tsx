@@ -12,6 +12,7 @@ import {
   type UseCollisionDetectionReturn,
 } from "@/hooks/useCollisionDetection";
 import type { ImageDimensions, GameMapProps } from "@/utils/types";
+import SVGAnimation from "./SVGAnimation";
 
 // Optimized WASD Controls with refs instead of state
 function WASDControls({
@@ -270,14 +271,6 @@ const GameMap: React.FC<GameMapProps> = ({
     const translateX = centerX - targetPosition[0] * scale;
     const translateY = centerY - targetPosition[1] * scale;
 
-    console.log("Camera Transform:", {
-      translateX,
-      translateY,
-      scale,
-      containerWidth,
-      containerHeight,
-    });
-
     return {
       transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
       transformOrigin: "0 0",
@@ -376,7 +369,7 @@ const GameMap: React.FC<GameMapProps> = ({
     return (
       <div className="relative w-full h-full flex items-center justify-center bg-gray-200">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+        <SVGAnimation />
           <p className="text-gray-600">Preparing map...</p>
         </div>
       </div>
@@ -387,7 +380,7 @@ const GameMap: React.FC<GameMapProps> = ({
     return (
       <div className="relative w-full h-full flex items-center justify-center bg-gray-200">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <SVGAnimation />
           <p className="text-gray-600">Loading collision map...</p>
         </div>
       </div>

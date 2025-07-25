@@ -46,6 +46,7 @@ export function useCollisionDetection(): UseCollisionDetectionReturn {
       try {
         const success = await initializeCollisionDetection();
         if (success) {
+          await new Promise((resolve) => setTimeout(resolve, 100)); // Artificial delay
           setIsLoaded(true);
           console.log("✅ Collision detection initialized successfully");
         } else {
@@ -60,6 +61,7 @@ export function useCollisionDetection(): UseCollisionDetectionReturn {
           errorMessage,
         );
       } finally {
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Artificial delay
         setIsLoading(false);
       }
     };

@@ -170,7 +170,6 @@ const StickerPeel: React.FC<StickerPeelProps> = ({
 
     const container = containerRef.current;
     const eventType = "mousemove";
-
     if (container) {
       container.addEventListener(eventType, updateLight);
       return () => container.removeEventListener(eventType, updateLight);
@@ -357,7 +356,6 @@ const StickerPeel: React.FC<StickerPeelProps> = ({
               className="block"
               style={imageStyle}
               draggable="false"
-              onContextMenu={(e) => e.preventDefault()}
             />
           </div>
         </div>
@@ -373,7 +371,6 @@ const StickerPeel: React.FC<StickerPeelProps> = ({
               className="block"
               style={shadowImageStyle}
               draggable="false"
-              onContextMenu={(e) => e.preventDefault()}
             />
           </div>
         </div>
@@ -389,7 +386,6 @@ const StickerPeel: React.FC<StickerPeelProps> = ({
               className="block"
               style={shadowImageStyle}
               draggable="false"
-              onContextMenu={(e) => e.preventDefault()}
             />
           </div>
         </div>

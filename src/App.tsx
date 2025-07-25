@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import StickerPeel from "./components/StickerPeel";
-
+import FaultyTerminal from "./components/FaultyTerminal";
+import { Canvas } from "@react-three/fiber";
+import { Suspense } from "react";
+import { OrbitControls, useGLTF } from "@react-three/drei";
 const stickerUrls = [
   "/stickers/Space-Explorr-Petr.png",
   "/stickers/Thanos.png",
@@ -39,7 +42,7 @@ export default function App() {
 
   useEffect(() => {
     const audio = document.getElementById(
-      "bg-music",
+      "bg-music"
     ) as HTMLAudioElement | null;
 
     if (audio) {
@@ -73,7 +76,7 @@ export default function App() {
             setDisplayedText((prev) => prev + fullLine[charIndex]);
             setCharIndex((prev) => prev + 1);
           },
-          currentLine === 0 && charIndex === 0 ? 5 : 50,
+          currentLine === 0 && charIndex === 0 ? 5 : 50
         );
         return () => clearTimeout(timeout);
       } else {
@@ -89,7 +92,7 @@ export default function App() {
 
   const handleStartGame = () => {
     const audio = document.getElementById(
-      "bg-music",
+      "bg-music"
     ) as HTMLAudioElement | null;
     if (audio) {
       audio.muted = false;
@@ -115,7 +118,27 @@ export default function App() {
           style={{ display: "none" }}
         />
 
-        <main className="relative flex h-screen w-screen bg-black overflow-hidden">
+        <main className="relative flex h-screen w-screen bg-black">
+          <FaultyTerminal
+            scale={2.5}
+            gridMul={[2, 1]}
+            digitSize={1.2}
+            timeScale={1}
+            pause={false}
+            scanlineIntensity={1}
+            glitchAmount={1}
+            flickerAmount={1}
+            noiseAmp={1}
+            chromaticAberration={1}
+            dither={0}
+            curvature={0}
+            tint="#00FF00"
+            mouseReact={true}
+            mouseStrength={1.5}
+            pageLoadAnimation={false}
+            brightness={0.21}
+            className="absolute inset-0 z-10"
+          />
           {/* Peelable stickers on black screen */}
           <StickerPeel
             imageSrc={random_stickerUrls[0]}
@@ -141,19 +164,8 @@ export default function App() {
             imageSrc={random_stickerUrls[5]}
             className="absolute bottom-[15%] right-[5%] z-20"
           />
-
           {/* Background grid pattern */}
           <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
-
-          {/* Petr sticker - shifted right */}
-          <div className="absolute left-[60%] top-[59%] -translate-y-1/2 h-[50vh] w-[35vw] min-w-[260px] max-w-[380px] flex items-center justify-center z-10 pointer-events-none select-none">
-            <img
-              src="/stickers/Github-petr-dark.png"
-              alt="Petr Sticker"
-              className="w-full h-full object-contain rounded-full"
-            />
-          </div>
-
           {/* Welcome text - moved further up */}
           <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20">
             <h1 className="text-6xl sm:text-7xl md:text-8xl font-bold text-white mb-8 animate-fadeInUp leading-tight">
@@ -165,30 +177,38 @@ export default function App() {
               </span>
             </h1>
           </div>
-          {/* Start button */}
-          <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 z-30">
-            <div className="text-center w-max mx-auto">
-              <button
-                onClick={handleStartGame}
-                className="group px-12 py-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-3xl font-bold rounded-2xl shadow-2xl hover:shadow-blue-500/30 hover:scale-110 transition-all duration-300 border-2 border-blue-400/30 hover:from-blue-500 hover:to-purple-500 animate-pulse"
-              >
-                <span className="flex items-center justify-center gap-4">
-                  🎮 <span>Click to Start</span> ✨
-                </span>
-              </button>
-              <p className="text-sm text-grey-100 font-medium mt-2">
-                P.S. You can click and drag some stickers — try peeling them off
-                the screen!
-              </p>
+          {/* Start button and 3D model in a single glassy card */}
+          <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 z-30 w-full flex justify-center">
+            <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-10 bg-white/20 backdrop-blur-xl rounded-3xl shadow-2xl border border-blue-400/30 px-8 py-6 sm:py-8 max-w-2xl mx-auto">
+              {/* 3D Model with label */}
+              <div className="flex flex-col items-center mb-4 sm:mb-0">
+                <div className="mb-2">
+                  <span className="inline-block px-3 py-1 bg-blue-500/80 text-white text-xs font-semibold rounded-full shadow-md border border-blue-300/60 animate-fadeInUp">
+                    Hi, I&apos;m Petr! You are trying to collect me 😊!
+                  </span>
+                </div>
+                <div className="flex items-center justify-center bg-white/20 backdrop-blur-lg rounded-2xl shadow-xl border border-blue-400/20 p-2 w-[120px] h-[120px] sm:w-[150px] sm:h-[150px]">
+                  <Test />
+                </div>
+              </div>
+              {/* Start button */}
+              <div className="text-center w-max mx-auto">
+                <button
+                  onClick={handleStartGame}
+                  className="relative btn btn-primary btn-lg px-12 py-6 font-extrabold text-2xl sm:text-3xl tracking-wider shadow-[0_6px_0_#1e293b,0_10px_20px_rgba(0,0,0,0.25)] border-0 bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 text-white skew-x-[-12deg] transition-transform duration-150 active:translate-y-1 active:shadow-[0_2px_0_#1e293b,0_4px_8px_rgba(0,0,0,0.25)] before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/30 before:to-transparent before:opacity-60 before:pointer-events-none overflow-hidden group"
+                  style={{ boxShadow: '0 6px 0 #1e293b, 0 10px 20px rgba(0,0,0,0.25)' }}
+                >
+                  <span className="flex items-center justify-center gap-4 -skew-x-[-12deg] drop-shadow-[0_2px_0_rgba(0,0,0,0.2)]">
+                    🎮 <span>Click to Start</span> ✨
+                  </span>
+                  <span className="absolute left-0 bottom-0 w-full h-2 bg-black/30 rounded-b-2xl blur-sm opacity-60 pointer-events-none" />
+                </button>
+                <p className="text-xs sm:text-sm text-grey-100 font-medium mt-2">
+                  P.S. You can click and drag some stickers — try peeling them off
+                  the screen!
+                </p>
+              </div>
             </div>
-          </div>
-
-          {/* Ambient dots */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute left-16 top-16 w-3 h-3 bg-blue-400/40 rounded-full animate-pulse" />
-            <div className="absolute right-20 top-1/3 w-2 h-2 bg-purple-400/50 rounded-full animate-pulse delay-1000" />
-            <div className="absolute left-1/4 bottom-20 w-2.5 h-2.5 bg-cyan-400/30 rounded-full animate-pulse delay-2000" />
-            <div className="absolute right-1/3 bottom-1/3 w-1.5 h-1.5 bg-yellow-400/40 rounded-full animate-pulse delay-3000" />
           </div>
         </main>
       </>
@@ -284,39 +304,43 @@ export default function App() {
           <div className="absolute right-20 top-1/3 w-1 h-1 bg-purple-400/40 rounded-full animate-pulse delay-1000" />
           <div className="absolute left-1/4 bottom-20 w-1.5 h-1.5 bg-cyan-400/20 rounded-full animate-pulse delay-2000" />
         </div>
-
-        {/* Animations */}
-        <style>
-          {`
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-
-          .animate-fadeInUp {
-            animation: fadeInUp 0.8s ease-out forwards;
-          }
-
-          .group:hover {
-            transform: translateY(-2px);
-          }
-            @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-.animate-blink {
-  animation: blink 1s step-start infinite;
-}
-
-        `}
-        </style>
       </main>
     </>
   );
 }
+
+import { Stage } from "@react-three/drei";
+import { useRef } from "react";
+
+function Test() {
+  const ref = useRef(null);
+  return (
+    <div className="w-full h-full flex items-center justify-center">
+      <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 2.1], fov: 35 }}>
+        <Suspense fallback={null}>
+          <Stage preset="rembrandt" intensity={1} environment={null}>
+            <Model />
+          </Stage>
+        </Suspense>
+        <OrbitControls ref={ref} autoRotate enablePan={false} enableZoom={false} />
+      </Canvas>
+    </div>
+  );
+}
+export function Model() {
+  const { nodes, materials } = useGLTF("/models/petr/scene.gltf");
+  return (
+    <group dispose={null} scale={1}>
+      <mesh
+        castShadow
+        receiveShadow
+        // @ts-expect-error: TypeScript doesn't recognize the geometry type
+        geometry={nodes.Object_4.geometry}
+        material={materials.petr_hd_Merged_Material}
+        rotation={[0, 0, 0]}
+      />
+    </group>
+  );
+}
+
+useGLTF.preload("/models/petr/scene.gltf");

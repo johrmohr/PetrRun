@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import SVGAnimation from "./SVGAnimation";
 
 interface ImageDimensions {
   width: number;
@@ -55,7 +56,7 @@ const ImagePreloader: React.FC<ImagePreloaderProps> = ({
       // Small delay to show 100% before transitioning
       setTimeout(() => {
         setIsLoaded(true);
-      }, 300);
+      }, 400);
     };
 
     const handleError = () => {
@@ -111,11 +112,7 @@ const ImagePreloader: React.FC<ImagePreloaderProps> = ({
           <div className="text-center p-8 bg-white rounded-xl shadow-2xl max-w-md">
             {/* Loading Animation */}
             <div className="mb-6">
-              <img
-                src="/stickers/Trombone_petr.png"
-                alt="Loading"
-                className="w-24 h-24 mx-auto animate-bounce"
-              />
+              <SVGAnimation />
             </div>
 
             <h2 className="text-2xl font-bold text-gray-800 mb-2">

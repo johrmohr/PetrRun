@@ -17,6 +17,7 @@
     "@types/three": "^0.178.1",
     "gsap": "^3.13.0",
     "leaflet": "^1.9.4",
+    "ogl": "^1.0.11",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-leaflet": "^5.0.0",

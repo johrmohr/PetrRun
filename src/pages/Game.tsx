@@ -204,7 +204,7 @@ export default function Game() {
           <div className="w-full h-full">
             <GameMap
               center={
-                phase === "countdown"
+                phase !== "countdown"
                   ? GAME_CONFIG.MAP.DEFAULT_CENTER
                   : playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER
               }
