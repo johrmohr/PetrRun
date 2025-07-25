@@ -1,7 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import GameMap from "../components/GameMap";
 import ImagePreloader from "../components/ImagePreloader";
-import { GAME_CONFIG, DROPSITES, DROP_RADIUS, stickerUrls } from "../utils/constants";
+import {
+  GAME_CONFIG,
+  DROPSITES,
+  DROP_RADIUS,
+  stickerUrls,
+} from "../utils/constants";
 import type { Dropsite } from "../utils/types";
 
 // Game states
@@ -31,7 +36,7 @@ export default function Game() {
   const [phase, setPhase] = useState<GamePhase>("start");
   const [playerPos, setPlayerPos] = useState<[number, number] | null>(null);
   const [currentDropsite, setCurrentDropsite] = useState<Dropsite>(() =>
-    selectRandomDropsite()
+    selectRandomDropsite(),
   );
   const [timer, setTimer] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -87,7 +92,7 @@ export default function Game() {
     // Check victory using current dropsite location (pixel distance)
     const distance = Math.sqrt(
       Math.pow(newPos[0] - currentDropsite.location[0], 2) +
-        Math.pow(newPos[1] - currentDropsite.location[1], 2)
+        Math.pow(newPos[1] - currentDropsite.location[1], 2),
     );
 
     if (distance < DROP_RADIUS) {

@@ -71,7 +71,7 @@ export async function loadCollisionMap(): Promise<CollisionData> {
         };
 
         console.log(
-          `🗺️ Collision map loaded: ${canvas.width}x${canvas.height} pixels`
+          `🗺️ Collision map loaded: ${canvas.width}x${canvas.height} pixels`,
         );
         resolve(collisionData);
       } catch (error) {
@@ -100,11 +100,11 @@ export function getTerrainAt(x: number, y: number): TerrainInfo {
   // Clamp coordinates to image bounds
   const clampedX = Math.max(
     0,
-    Math.min(Math.floor(x), collisionData.width - 1)
+    Math.min(Math.floor(x), collisionData.width - 1),
   );
   const clampedY = Math.max(
     0,
-    Math.min(Math.floor(y), collisionData.height - 1)
+    Math.min(Math.floor(y), collisionData.height - 1),
   );
 
   // Calculate pixel index (RGBA format)
@@ -160,7 +160,7 @@ export function isMovementValid(
   fromX: number,
   fromY: number,
   toX: number,
-  toY: number
+  toY: number,
 ): boolean {
   // Check the destination terrain
   const destinationTerrain = getTerrainAt(toX, toY);
@@ -180,7 +180,7 @@ export function isMovementValid(
 export function getMovementSpeed(
   x: number,
   y: number,
-  baseSpeed: number
+  baseSpeed: number,
 ): number {
   const terrain = getTerrainAt(x, y);
   return baseSpeed * terrain.speedMultiplier;

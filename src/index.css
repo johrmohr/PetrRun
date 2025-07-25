@@ -17,7 +17,6 @@
 
 /* Player marker animations - Updated for Trombone Petr image */
 @keyframes playerBounce {
-
   0%,
   100% {
     transform: translateY(0px) scale(1);
@@ -29,36 +28,39 @@
 }
 
 @keyframes playerGlow {
-
   0%,
   100% {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   }
 
   50% {
-    filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.7)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.7))
+      drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   }
 }
 
 /* Treasure marker glow */
 @keyframes treasureGlow {
-
   0%,
   100% {
     box-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
   }
 
   50% {
-    box-shadow: 0 0 20px rgba(255, 165, 0, 0.8), 0 0 30px rgba(255, 165, 0, 0.6);
+    box-shadow:
+      0 0 20px rgba(255, 165, 0, 0.8),
+      0 0 30px rgba(255, 165, 0, 0.6);
   }
 }
 
 /* Apply animations to game elements */
 .game-map .z-20 img {
-  animation: playerBounce 1.5s infinite ease-in-out, playerGlow 2s infinite;
+  animation:
+    playerBounce 1.5s infinite ease-in-out,
+    playerGlow 2s infinite;
 }
 
-.game-map .z-10>div[style*="rgb(255, 165, 0)"] {
+.game-map .z-10 > div[style*="rgb(255, 165, 0)"] {
   animation: treasureGlow 2s infinite;
 }
 
@@ -155,7 +157,6 @@ input[type="range"]::-moz-range-thumb:hover {
 
 /* Zoom slider animation */
 @keyframes zoomPulse {
-
   0%,
   100% {
     transform: scale(1);

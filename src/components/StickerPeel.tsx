@@ -226,7 +226,7 @@ const StickerPeel: React.FC<StickerPeelProps> = ({
       lightingIntensity,
       peelDirection,
       defaultPadding,
-    ]
+    ],
   );
   const stickerMainStyle: CSSProperties = {
     clipPath: `polygon(var(--sticker-start) var(--sticker-start), var(--sticker-end) var(--sticker-start), var(--sticker-end) var(--sticker-end), var(--sticker-start) var(--sticker-end))`,

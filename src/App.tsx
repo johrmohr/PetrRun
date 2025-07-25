@@ -39,7 +39,7 @@ export default function App() {
 
   useEffect(() => {
     const audio = document.getElementById(
-      "bg-music"
+      "bg-music",
     ) as HTMLAudioElement | null;
 
     if (audio) {
@@ -73,7 +73,7 @@ export default function App() {
             setDisplayedText((prev) => prev + fullLine[charIndex]);
             setCharIndex((prev) => prev + 1);
           },
-          currentLine === 0 && charIndex === 0 ? 5 : 50
+          currentLine === 0 && charIndex === 0 ? 5 : 50,
         );
         return () => clearTimeout(timeout);
       } else {
@@ -89,7 +89,7 @@ export default function App() {
 
   const handleStartGame = () => {
     const audio = document.getElementById(
-      "bg-music"
+      "bg-music",
     ) as HTMLAudioElement | null;
     if (audio) {
       audio.muted = false;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface ImageDimensions {
   width: number;
@@ -19,10 +19,10 @@ export const useImageDimensions = (imageSrc: string): ImageDimensions => {
     if (!imageSrc) return;
 
     const img = new Image();
-    
+
     img.onload = () => {
       const aspectRatio = img.naturalWidth / img.naturalHeight;
-      
+
       setDimensions({
         width: img.naturalWidth,
         height: img.naturalHeight,
@@ -51,4 +51,4 @@ export const useImageDimensions = (imageSrc: string): ImageDimensions => {
   }, [imageSrc]);
 
   return dimensions;
-}; 
+};

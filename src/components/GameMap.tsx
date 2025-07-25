@@ -78,7 +78,7 @@ function WASDControls({
         ? collision.calculateSpeed(
             playerPosition[0],
             playerPosition[1],
-            baseMoveSpeed
+            baseMoveSpeed,
           )
         : baseMoveSpeed;
 
@@ -131,7 +131,7 @@ function WASDControls({
             playerPosition[0],
             playerPosition[1],
             newX,
-            newY
+            newY,
           );
           console.log("WASDControls: Collision check", {
             from: playerPosition,
@@ -145,15 +145,15 @@ function WASDControls({
               0,
               Math.min(
                 imageDimensions.width,
-                playerPosition[0] + normalizedMoveX
-              )
+                playerPosition[0] + normalizedMoveX,
+              ),
             );
             const tryY = Math.max(
               0,
               Math.min(
                 imageDimensions.height,
-                playerPosition[1] + normalizedMoveY
-              )
+                playerPosition[1] + normalizedMoveY,
+              ),
             );
 
             if (
@@ -161,7 +161,7 @@ function WASDControls({
                 playerPosition[0],
                 playerPosition[1],
                 tryX,
-                playerPosition[1]
+                playerPosition[1],
               )
             ) {
               newX = tryX;
@@ -171,7 +171,7 @@ function WASDControls({
                 playerPosition[0],
                 playerPosition[1],
                 playerPosition[0],
-                tryY
+                tryY,
               )
             ) {
               newX = playerPosition[0];
@@ -292,7 +292,7 @@ const GameMap: React.FC<GameMapProps> = ({
     if (collision.isLoaded && !collision.isLoading) {
       console.log(
         "🎯 Auto-center fix triggered! Collision map loaded:",
-        collision.isLoaded
+        collision.isLoaded,
       );
     }
   }, [collision.isLoaded, collision.isLoading]);
@@ -426,7 +426,7 @@ const GameMap: React.FC<GameMapProps> = ({
       mapY,
       "(scale:",
       scale,
-      ")"
+      ")",
     );
     onMapClick({ x: mapX, y: mapY });
   };
@@ -547,7 +547,7 @@ const GameMap: React.FC<GameMapProps> = ({
               {(() => {
                 const terrain = collision.getTerrainInfo(
                   playerPosition[0],
-                  playerPosition[1]
+                  playerPosition[1],
                 );
                 const terrainIcon = {
                   blocked: "🚫",

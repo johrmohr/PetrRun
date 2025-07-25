@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface ZoomSliderProps {
   zoomLevel: number;
@@ -28,7 +28,9 @@ const ZoomSlider: React.FC<ZoomSliderProps> = ({
   };
 
   return (
-    <div className={`bg-white bg-opacity-90 backdrop-blur rounded-lg p-4 shadow-lg ${className}`}>
+    <div
+      className={`bg-white bg-opacity-90 backdrop-blur rounded-lg p-4 shadow-lg ${className}`}
+    >
       <div className="flex flex-col items-center space-y-2">
         <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
           <span>🔍</span>
@@ -52,11 +54,10 @@ const ZoomSlider: React.FC<ZoomSliderProps> = ({
               onChange={(e) => onZoomChange(parseFloat(e.target.value))}
               className="w-24 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               style={{
-                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${percentage}%, #e5e7eb ${percentage}%, #e5e7eb 100%)`
+                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${percentage}%, #e5e7eb ${percentage}%, #e5e7eb 100%)`,
               }}
             />
             {/* Custom slider thumb styling */}
-
           </div>
           <button
             onClick={() => onZoomChange(Math.min(maxZoom, zoomLevel + step))}
@@ -68,8 +69,12 @@ const ZoomSlider: React.FC<ZoomSliderProps> = ({
         </div>
         <div className="flex flex-col items-center space-y-1">
           <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-600">{zoomLevel.toFixed(1)}x</span>
-            <span className="text-xs text-gray-500">({getZoomDescription(zoomLevel)})</span>
+            <span className="text-xs text-gray-600">
+              {zoomLevel.toFixed(1)}x
+            </span>
+            <span className="text-xs text-gray-500">
+              ({getZoomDescription(zoomLevel)})
+            </span>
           </div>
           <button
             onClick={() => onZoomChange(2.5)}
@@ -84,4 +89,4 @@ const ZoomSlider: React.FC<ZoomSliderProps> = ({
   );
 };
 
-export default ZoomSlider; 
+export default ZoomSlider;

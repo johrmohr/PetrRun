@@ -9,8 +9,10 @@ export const preloadImage = (src: string): Promise<HTMLImageElement> => {
   });
 };
 
-export const preloadImages = async (imageSources: string[]): Promise<HTMLImageElement[]> => {
-  const promises = imageSources.map(src => preloadImage(src));
+export const preloadImages = async (
+  imageSources: string[],
+): Promise<HTMLImageElement[]> => {
+  const promises = imageSources.map((src) => preloadImage(src));
   return Promise.all(promises);
 };
 
@@ -18,7 +20,7 @@ export const preloadImages = async (imageSources: string[]): Promise<HTMLImageEl
 export const createOptimizedBackgroundStyle = (
   imageSrc: string,
   width: number,
-  height: number
+  height: number,
 ): React.CSSProperties => ({
   backgroundImage: `url(${imageSrc})`,
   backgroundSize: `${width}px ${height}px`,
@@ -58,7 +60,7 @@ export const imageCache = new ImageCache();
 
 // Constants for map optimization
 export const MAP_CONFIG = {
-  ORIGINAL_WIDTH: 5000,  // Updated to actual current image dimensions
+  ORIGINAL_WIDTH: 5000, // Updated to actual current image dimensions
   ORIGINAL_HEIGHT: 3517, // Updated to actual current image dimensions
   TILE_SIZE: 256,
   MAX_ZOOM: 2.5,
@@ -71,4 +73,4 @@ export default {
   createOptimizedBackgroundStyle,
   imageCache,
   MAP_CONFIG,
-}; 
+};

@@ -1,19 +1,24 @@
-import { useState, useEffect } from 'react';
-import { 
-  initializeCollisionDetection, 
-  getTerrainAt, 
-  isMovementValid, 
+import { useState, useEffect } from "react";
+import {
+  initializeCollisionDetection,
+  getTerrainAt,
+  isMovementValid,
   getMovementSpeed,
   getCollisionDataStatus,
-  type TerrainInfo 
-} from '../utils/collisionDetection';
+  type TerrainInfo,
+} from "../utils/collisionDetection";
 
 export interface UseCollisionDetectionReturn {
   isLoaded: boolean;
   isLoading: boolean;
   error: string | null;
   getTerrainInfo: (x: number, y: number) => TerrainInfo;
-  checkMovement: (fromX: number, fromY: number, toX: number, toY: number) => boolean;
+  checkMovement: (
+    fromX: number,
+    fromY: number,
+    toX: number,
+    toY: number,
+  ) => boolean;
   calculateSpeed: (x: number, y: number, baseSpeed: number) => number;
 }
 
@@ -42,14 +47,18 @@ export function useCollisionDetection(): UseCollisionDetectionReturn {
         const success = await initializeCollisionDetection();
         if (success) {
           setIsLoaded(true);
-          console.log('✅ Collision detection initialized successfully');
+          console.log("✅ Collision detection initialized successfully");
         } else {
-          throw new Error('Failed to initialize collision detection');
+          throw new Error("Failed to initialize collision detection");
         }
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error";
         setError(errorMessage);
-        console.error('❌ Collision detection initialization failed:', errorMessage);
+        console.error(
+          "❌ Collision detection initialization failed:",
+          errorMessage,
+        );
       } finally {
         setIsLoading(false);
       }
@@ -63,9 +72,9 @@ export function useCollisionDetection(): UseCollisionDetectionReturn {
     isLoading,
     error,
     getTerrainInfo: (x: number, y: number) => getTerrainAt(x, y),
-    checkMovement: (fromX: number, fromY: number, toX: number, toY: number) => 
+    checkMovement: (fromX: number, fromY: number, toX: number, toY: number) =>
       isMovementValid(fromX, fromY, toX, toY),
-    calculateSpeed: (x: number, y: number, baseSpeed: number) => 
-      getMovementSpeed(x, y, baseSpeed)
+    calculateSpeed: (x: number, y: number, baseSpeed: number) =>
+      getMovementSpeed(x, y, baseSpeed),
   };
-} 
+}

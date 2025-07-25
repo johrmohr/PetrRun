@@ -13,23 +13,24 @@ export const DROPSITES = [
     photo: "/Locations/Bio_Sci_Garden.png",
     location: [2000, 819] as [number, number], // Scaled from [800, 600] for 5000x3517 map
     difficulty: "medium",
-    description: "The iconic space exploration center where Petr dreams of the stars"
+    description:
+      "The iconic space exploration center where Petr dreams of the stars",
   },
   {
     id: "thanos-statue",
-    name: "Social Science Plaza", 
+    name: "Social Science Plaza",
     photo: "/Locations/Social_Science_Plaza.png",
     location: [2825, 1225] as [number, number], // Scaled from [1200, 400] for 5000x3517 map
     difficulty: "hard",
-    description: "A mysterious purple structure that appeared overnight"
+    description: "A mysterious purple structure that appeared overnight",
   },
   {
     id: "music-pavilion",
     name: "Trombone Performance Stage",
-    photo: "/Locations/Humanities_Bridge.png", 
+    photo: "/Locations/Humanities_Bridge.png",
     location: [1500, 2198] as [number, number], // Scaled from [600, 1000] for 5000x3517 map
     difficulty: "easy",
-    description: "Where Petr practices his musical talents"
+    description: "Where Petr practices his musical talents",
   },
   {
     id: "aldrich-park",
@@ -37,15 +38,15 @@ export const DROPSITES = [
     photo: "/Locations/University_Club.png",
     location: [2438, 1709] as [number, number], // Scaled from [1000, 800] for 5000x3517 map
     difficulty: "medium",
-    description: "The heart of campus where students gather"
+    description: "The heart of campus where students gather",
   },
   {
     id: "engineering-tower",
-    name: "Back of Science Library", 
+    name: "Back of Science Library",
     photo: "/Locations/Back_of_Sci_Lib.png",
     location: [1856, 1358] as [number, number], // Scaled from [1400, 300] for 5000x3517 map
-    difficulty: "hard", 
-    description: "The tallest structure visible from across campus"
+    difficulty: "hard",
+    description: "The tallest structure visible from across campus",
   },
   {
     id: "student-center",
@@ -53,8 +54,8 @@ export const DROPSITES = [
     photo: "/Locations/Student_Center_Tables.png",
     location: [2466, 953] as [number, number], // Scaled from [700, 1200] for 5000x3517 map
     difficulty: "easy",
-    description: "Where Petrs fuel up between classes"
-  }
+    description: "Where Petrs fuel up between classes",
+  },
 ] as const;
 
 export const DROP_RADIUS = 30; // Increased for larger map (was 50)
@@ -97,4 +98,3 @@ export const GAME_CONFIG = {
     GAME_STYLE: true,
   },
 } as const;
-

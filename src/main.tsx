@@ -13,5 +13,5 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/game" element={<Game />} />
       </Routes>
     </BrowserRouter>
-  </StrictMode>
+  </StrictMode>,
 );
