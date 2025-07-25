@@ -1,22 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import ZoomSlider from "./ZoomSlider";
 import {
   useCollisionDetection,
   type UseCollisionDetectionReturn,
-} from "../hooks/useCollisionDetection";
+} from "@/hooks/useCollisionDetection";
 
 interface GameMarker {
-  position: [number, number]; // [x, y] pixels
+  position: [number, number];
   popup?: string;
-  type?:
-    | "player"
-    | "checkpoint"
-    | "obstacle"
-    | "treasure"
-    | "enemy"
-    | "default";
+  type?: "player" | "checkpoint" | "obstacle" | "treasure" | "enemy" | "default";
   color?: string;
-  sprite?: string; // URL to sprite image
+  sprite?: string;
 }
 
 interface ImageDimensions {
@@ -26,18 +20,19 @@ interface ImageDimensions {
 }
 
 interface GameMapProps {
-  center?: [number, number]; // [x, y] pixels
+  center?: [number, number];
   zoom?: number;
   height?: string;
   width?: string;
   markers?: GameMarker[];
-  playerPosition?: [number, number]; // [x, y] pixels
+  playerPosition?: [number, number];
   onMapClick?: (position: { x: number; y: number }) => void;
   onPlayerMove?: (newPosition: [number, number]) => void;
   imageDimensions: ImageDimensions;
   gamePhase?: string;
 }
 
+// Optimized WASD Controls with refs instead of state
 function WASDControls({
   onPlayerMove,
   playerPosition,
@@ -46,158 +41,96 @@ function WASDControls({
 }: {
   onPlayerMove?: (newPosition: [number, number]) => void;
   playerPosition?: [number, number];
-  mapRef: React.RefObject<HTMLDivElement | null>;
   imageDimensions: ImageDimensions;
   collision: UseCollisionDetectionReturn;
 }) {
   const keysPressed = useRef<Set<string>>(new Set());
   const animationFrame = useRef<number | null>(null);
   const lastUpdate = useRef<number>(performance.now());
+  const playerPosRef = useRef(playerPosition);
+  const onPlayerMoveRef = useRef(onPlayerMove);
+
+  // Update refs when props change
+  playerPosRef.current = playerPosition;
+  onPlayerMoveRef.current = onPlayerMove;
 
   useEffect(() => {
-    console.log("WASDControls: useEffect mounted", {
-      playerPosition,
-      onPlayerMove: !!onPlayerMove,
-    });
-
     const updatePosition = (timestamp: number) => {
-      if (!playerPosition || !onPlayerMove) {
-        console.log("WASDControls: Skipping update", {
-          hasPlayerPosition: !!playerPosition,
-          hasOnPlayerMove: !!onPlayerMove,
-        });
+      const currentPlayerPos = playerPosRef.current;
+      const currentOnPlayerMove = onPlayerMoveRef.current;
+
+      if (!currentPlayerPos || !currentOnPlayerMove) {
         animationFrame.current = requestAnimationFrame(updatePosition);
         return;
       }
 
-      const deltaTime = Math.min((timestamp - lastUpdate.current) / 1000, 0.1); // Cap deltaTime at 100ms
+      const deltaTime = Math.min((timestamp - lastUpdate.current) / 1000, 0.1);
       lastUpdate.current = timestamp;
 
-      const baseMoveSpeed = 150; // Pixels per second (reduced from 300)
+      const baseMoveSpeed = 150;
       const currentSpeed = collision.isLoaded
         ? collision.calculateSpeed(
-            playerPosition[0],
-            playerPosition[1],
-            baseMoveSpeed,
+            currentPlayerPos[0],
+            currentPlayerPos[1],
+            baseMoveSpeed
           )
         : baseMoveSpeed;
 
       let moveX = 0;
       let moveY = 0;
 
-      // Accumulate movement direction based on keys
-      if (keysPressed.current.has("w") || keysPressed.current.has("arrowup")) {
-        moveY -= 1;
-      }
-      if (
-        keysPressed.current.has("s") ||
-        keysPressed.current.has("arrowdown")
-      ) {
-        moveY += 1;
-      }
-      if (
-        keysPressed.current.has("a") ||
-        keysPressed.current.has("arrowleft")
-      ) {
-        moveX -= 1;
-      }
-      if (
-        keysPressed.current.has("d") ||
-        keysPressed.current.has("arrowright")
-      ) {
-        moveX += 1;
-      }
+      // Check keys
+      const keys = keysPressed.current;
+      if (keys.has("w") || keys.has("arrowup")) moveY -= 1;
+      if (keys.has("s") || keys.has("arrowdown")) moveY += 1;
+      if (keys.has("a") || keys.has("arrowleft")) moveX -= 1;
+      if (keys.has("d") || keys.has("arrowright")) moveX += 1;
 
-      let newX = playerPosition[0];
-      let newY = playerPosition[1];
-
-      // Only calculate movement if there's a direction
       if (moveX !== 0 || moveY !== 0) {
-        // Normalize movement vector to ensure consistent speed in all directions
         const magnitude = Math.sqrt(moveX * moveX + moveY * moveY);
         const normalizedMoveX = (moveX / magnitude) * currentSpeed * deltaTime;
         const normalizedMoveY = (moveY / magnitude) * currentSpeed * deltaTime;
 
-        newX = playerPosition[0] + normalizedMoveX;
-        newY = playerPosition[1] + normalizedMoveY;
+        let newX = currentPlayerPos[0] + normalizedMoveX;
+        let newY = currentPlayerPos[1] + normalizedMoveY;
 
-        // Clamp position to map boundaries
+        // Clamp to boundaries
         newX = Math.max(0, Math.min(imageDimensions.width, newX));
         newY = Math.max(0, Math.min(imageDimensions.height, newY));
 
-        // Handle collision
+        // Collision detection
         if (collision.isLoaded) {
           const canMove = collision.checkMovement(
-            playerPosition[0],
-            playerPosition[1],
+            currentPlayerPos[0],
+            currentPlayerPos[1],
             newX,
-            newY,
+            newY
           );
-          console.log("WASDControls: Collision check", {
-            from: playerPosition,
-            to: [newX, newY],
-            canMove,
-          });
 
           if (!canMove) {
-            // Try moving only in X or Y direction to allow sliding along obstacles
-            const tryX = Math.max(
-              0,
-              Math.min(
-                imageDimensions.width,
-                playerPosition[0] + normalizedMoveX,
-              ),
-            );
-            const tryY = Math.max(
-              0,
-              Math.min(
-                imageDimensions.height,
-                playerPosition[1] + normalizedMoveY,
-              ),
-            );
+            // Try sliding along obstacles
+            const tryX = Math.max(0, Math.min(imageDimensions.width, currentPlayerPos[0] + normalizedMoveX));
+            const tryY = Math.max(0, Math.min(imageDimensions.height, currentPlayerPos[1] + normalizedMoveY));
 
-            if (
-              collision.checkMovement(
-                playerPosition[0],
-                playerPosition[1],
-                tryX,
-                playerPosition[1],
-              )
-            ) {
+            if (collision.checkMovement(currentPlayerPos[0], currentPlayerPos[1], tryX, currentPlayerPos[1])) {
               newX = tryX;
-              newY = playerPosition[1];
-            } else if (
-              collision.checkMovement(
-                playerPosition[0],
-                playerPosition[1],
-                playerPosition[0],
-                tryY,
-              )
-            ) {
-              newX = playerPosition[0];
+              newY = currentPlayerPos[1];
+            } else if (collision.checkMovement(currentPlayerPos[0], currentPlayerPos[1], currentPlayerPos[0], tryY)) {
+              newX = currentPlayerPos[0];
               newY = tryY;
             } else {
-              newX = playerPosition[0];
-              newY = playerPosition[1];
+              newX = currentPlayerPos[0];
+              newY = currentPlayerPos[1];
             }
           }
         }
 
-        console.log("WASDControls: Attempting move", {
-          from: playerPosition,
-          to: [newX, newY],
-          delta: [normalizedMoveX, normalizedMoveY],
-          speed: currentSpeed,
-          deltaTime,
-        });
-
-        // Only call onPlayerMove if position actually changed
-        if (newX !== playerPosition[0] || newY !== playerPosition[1]) {
-          onPlayerMove([newX, newY]);
+        // Only update if position changed
+        if (newX !== currentPlayerPos[0] || newY !== currentPlayerPos[1]) {
+          currentOnPlayerMove([newX, newY]);
         }
       }
 
-      // Keep the animation loop running for smooth updates
       animationFrame.current = requestAnimationFrame(updatePosition);
     };
 
@@ -205,60 +138,31 @@ function WASDControls({
       if (e.target instanceof HTMLInputElement) return;
 
       const key = e.key.toLowerCase();
-      if (
-        [
-          "w",
-          "a",
-          "s",
-          "d",
-          "arrowup",
-          "arrowleft",
-          "arrowdown",
-          "arrowright",
-        ].includes(key)
-      ) {
+      if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
         e.preventDefault();
-        if (!keysPressed.current.has(key)) {
-          keysPressed.current.add(key);
-          console.log("WASDControls: Key down", {
-            key,
-            keysPressed: Array.from(keysPressed.current),
-          });
-          // Start animation loop if not already running
-          if (!animationFrame.current) {
-            lastUpdate.current = performance.now();
-            animationFrame.current = requestAnimationFrame(updatePosition);
-          }
+        keysPressed.current.add(key);
+        if (!animationFrame.current) {
+          lastUpdate.current = performance.now();
+          animationFrame.current = requestAnimationFrame(updatePosition);
         }
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      const key = e.key.toLowerCase();
-      if (keysPressed.current.has(key)) {
-        keysPressed.current.delete(key);
-        console.log("WASDControls: Key up", {
-          key,
-          keysPressed: Array.from(keysPressed.current),
-        });
-      }
+      keysPressed.current.delete(e.key.toLowerCase());
     };
 
     const handleBlur = () => {
-      console.log("WASDControls: Window blur - clearing keys");
       keysPressed.current.clear();
-      // Don't cancel animation frame to keep loop running
     };
 
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
     window.addEventListener("blur", handleBlur);
-
-    // Start the animation loop immediately
+    
     animationFrame.current = requestAnimationFrame(updatePosition);
 
     return () => {
-      console.log("WASDControls: Cleaning up");
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
@@ -266,7 +170,7 @@ function WASDControls({
         cancelAnimationFrame(animationFrame.current);
       }
     };
-  }, [onPlayerMove, playerPosition, imageDimensions, collision]);
+  }, [imageDimensions, collision]); // Removed playerPosition and onPlayerMove from deps
 
   return null;
 }
@@ -283,64 +187,15 @@ const GameMap: React.FC<GameMapProps> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const collision = useCollisionDetection();
+  
+  // Single state for zoom with lazy initialization
   const [zoomLevel, setZoomLevel] = useState(() => {
     const savedZoom = localStorage.getItem("petrrun-zoom-level");
     return savedZoom ? parseFloat(savedZoom) : 2.5;
   });
 
-  useEffect(() => {
-    if (collision.isLoaded && !collision.isLoading) {
-      console.log(
-        "🎯 Auto-center fix triggered! Collision map loaded:",
-        collision.isLoaded,
-      );
-    }
-  }, [collision.isLoaded, collision.isLoading]);
-
-  useEffect(() => {
-    localStorage.setItem("petrrun-zoom-level", zoomLevel.toString());
-  }, [zoomLevel]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement) return;
-      const key = e.key.toLowerCase();
-      if (
-        [
-          "w",
-          "a",
-          "s",
-          "d",
-          "arrowup",
-          "arrowleft",
-          "arrowdown",
-          "arrowright",
-        ].includes(key)
-      ) {
-        return;
-      }
-      switch (e.key) {
-        case "=":
-        case "+":
-          e.preventDefault();
-          setZoomLevel((prev) => Math.min(4, prev + 0.2));
-          break;
-        case "-":
-          e.preventDefault();
-          setZoomLevel((prev) => Math.max(0.5, prev - 0.2));
-          break;
-        case "0":
-          e.preventDefault();
-          setZoomLevel(2.5);
-          break;
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  const getCameraTransform = () => {
+  // Memoized camera transform calculation
+  const cameraTransform = useMemo(() => {
     if (!containerRef.current) {
       return {
         transform: `scale(${Math.max(zoomLevel * 0.6, 0.5)})`,
@@ -354,27 +209,12 @@ const GameMap: React.FC<GameMapProps> = ({
     const centerY = containerHeight / 2;
     const scale = zoomLevel;
 
-    if (gamePhase === "countdown") {
-      const translateX = centerX - center[0] * scale;
-      const translateY = centerY - center[1] * scale;
-      return {
-        transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
-        transformOrigin: "0 0",
-        willChange: "transform",
-      };
+    let targetPosition = center;
+    
+    if (gamePhase === "playing" && playerPosition) {
+      targetPosition = playerPosition;
     }
 
-    if (playerPosition && gamePhase === "playing") {
-      const translateX = centerX - playerPosition[0] * scale;
-      const translateY = centerY - playerPosition[1] * scale;
-      return {
-        transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
-        transformOrigin: "0 0",
-        willChange: "transform",
-      };
-    }
-
-    const targetPosition = playerPosition || center;
     const translateX = centerX - targetPosition[0] * scale;
     const translateY = centerY - targetPosition[1] * scale;
 
@@ -383,9 +223,10 @@ const GameMap: React.FC<GameMapProps> = ({
       transformOrigin: "0 0",
       willChange: "transform",
     };
-  };
+  }, [zoomLevel, center, playerPosition, gamePhase]);
 
-  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  // Memoized click handler
+  const handleMapClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!onMapClick || !mapRef.current || !containerRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
@@ -398,39 +239,65 @@ const GameMap: React.FC<GameMapProps> = ({
     const centerY = containerHeight / 2;
     const scale = zoomLevel;
 
-    let mapX, mapY;
-    if (gamePhase === "countdown") {
-      const translateX = centerX - center[0] * scale;
-      const translateY = centerY - center[1] * scale;
-      mapX = (containerX - translateX) / scale;
-      mapY = (containerY - translateY) / scale;
-    } else if (playerPosition && gamePhase === "playing") {
-      const translateX = centerX - playerPosition[0] * scale;
-      const translateY = centerY - playerPosition[1] * scale;
-      mapX = (containerX - translateX) / scale;
-      mapY = (containerY - translateY) / scale;
-    } else {
-      const targetPosition = playerPosition || center;
-      const translateX = centerX - targetPosition[0] * scale;
-      const translateY = centerY - targetPosition[1] * scale;
-      mapX = (containerX - translateX) / scale;
-      mapY = (containerY - translateY) / scale;
-    }
+    const targetPosition = (gamePhase === "playing" && playerPosition) ? playerPosition : center;
+    const translateX = centerX - targetPosition[0] * scale;
+    const translateY = centerY - targetPosition[1] * scale;
+    
+    const mapX = (containerX - translateX) / scale;
+    const mapY = (containerY - translateY) / scale;
 
-    console.log(
-      "🖱️ Click at screen:",
-      containerX,
-      containerY,
-      "→ Map:",
-      mapX,
-      mapY,
-      "(scale:",
-      scale,
-      ")",
-    );
     onMapClick({ x: mapX, y: mapY });
-  };
+  }, [onMapClick, zoomLevel, center, playerPosition, gamePhase]);
 
+  // Memoized wheel handler
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoomLevel(prev => Math.max(0.5, Math.min(4, prev + delta)));
+  }, []);
+
+  // Memoized terrain info
+  const terrainInfo = useMemo(() => {
+    if (!playerPosition || !collision.isLoaded) return null;
+    return collision.getTerrainInfo(playerPosition[0], playerPosition[1]);
+  }, [playerPosition, collision.isLoaded, collision]);
+
+  // Single effect for all keyboard shortcuts and zoom persistence
+  useEffect(() => {
+    // Save zoom to localStorage
+    localStorage.setItem("petrrun-zoom-level", zoomLevel.toString());
+
+    // Keyboard shortcuts
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement) return;
+      
+      const key = e.key.toLowerCase();
+      if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
+        return; // Handled by WASDControls
+      }
+
+      switch (e.key) {
+        case "=":
+        case "+":
+          e.preventDefault();
+          setZoomLevel(prev => Math.min(4, prev + 0.2));
+          break;
+        case "-":
+          e.preventDefault();
+          setZoomLevel(prev => Math.max(0.5, prev - 0.2));
+          break;
+        case "0":
+          e.preventDefault();
+          setZoomLevel(2.5);
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [zoomLevel]);
+
+  // Loading states
   if (!imageDimensions) {
     return (
       <div className="relative w-full h-full flex items-center justify-center bg-gray-200">
@@ -453,12 +320,6 @@ const GameMap: React.FC<GameMapProps> = ({
     );
   }
 
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoomLevel((prev) => Math.max(0.5, Math.min(4, prev + delta)));
-  };
-
   return (
     <div
       ref={containerRef}
@@ -468,10 +329,10 @@ const GameMap: React.FC<GameMapProps> = ({
       <WASDControls
         onPlayerMove={onPlayerMove}
         playerPosition={playerPosition}
-        mapRef={mapRef}
         imageDimensions={imageDimensions}
         collision={collision}
       />
+      
       <div
         ref={mapRef}
         className="game-map absolute cursor-crosshair"
@@ -485,7 +346,7 @@ const GameMap: React.FC<GameMapProps> = ({
           height: `${imageDimensions.height}px`,
           backfaceVisibility: "hidden",
           imageRendering: "auto",
-          ...getCameraTransform(),
+          ...cameraTransform,
         }}
       >
         {markers.map((marker, index) => (
@@ -505,6 +366,7 @@ const GameMap: React.FC<GameMapProps> = ({
           </div>
         ))}
       </div>
+
       {playerPosition && (
         <div
           className="absolute z-20 pointer-events-none"
@@ -526,11 +388,13 @@ const GameMap: React.FC<GameMapProps> = ({
           />
         </div>
       )}
+
       <ZoomSlider
         zoomLevel={zoomLevel}
         onZoomChange={setZoomLevel}
         className="absolute top-4 right-4 z-30"
       />
+
       <div className="absolute bottom-4 left-4 bg-black bg-opacity-70 text-white text-sm px-3 py-2 rounded backdrop-blur z-30">
         <div className="space-y-1">
           <div>
@@ -541,29 +405,25 @@ const GameMap: React.FC<GameMapProps> = ({
           <div className="text-xs opacity-75">
             Zoom: Mouse wheel or +/- keys • Reset: 0 key
           </div>
-          {playerPosition && collision.isLoaded && (
+          {terrainInfo && (
             <div className="text-xs opacity-75 flex items-center gap-2">
               <span>Terrain:</span>
               {(() => {
-                const terrain = collision.getTerrainInfo(
-                  playerPosition[0],
-                  playerPosition[1],
-                );
                 const terrainIcon = {
                   blocked: "🚫",
                   fast: "🟢",
                   grass: "🟡",
                   stairs: "🟠",
                   normal: "⚪",
-                }[terrain.terrainType];
+                }[terrainInfo.terrainType];
                 const speedText =
-                  terrain.terrainType === "blocked"
+                  terrainInfo.terrainType === "blocked"
                     ? "Blocked"
-                    : `${Math.round(terrain.speedMultiplier * 100)}% speed`;
+                    : `${Math.round(terrainInfo.speedMultiplier * 100)}% speed`;
                 return (
                   <span className="flex items-center gap-1">
                     {terrainIcon}
-                    <span>{terrain.terrainType}</span>
+                    <span>{terrainInfo.terrainType}</span>
                     <span>({speedText})</span>
                   </span>
                 );
