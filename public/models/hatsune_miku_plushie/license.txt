@@ -1,0 +1,11 @@
+Model Information:
+* title:	Hatsune Miku Plushie
+* source:	https://sketchfab.com/3d-models/hatsune-miku-plushie-22e25b5fbd444102a175c088e14eb541
+* author:	revsworks (https://sketchfab.com/revsworks)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Hatsune Miku Plushie" (https://sketchfab.com/3d-models/hatsune-miku-plushie-22e25b5fbd444102a175c088e14eb541) by revsworks (https://sketchfab.com/revsworks) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

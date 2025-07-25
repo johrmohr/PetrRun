@@ -24,6 +24,6 @@ dist-ssr
 *.sw?
 
 project-memory.md
-models/
+
 combined_map_reduced.png
 bigMap.png

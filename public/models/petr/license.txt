@@ -1,0 +1,11 @@
+Model Information:
+* title:	Petr
+* source:	https://sketchfab.com/3d-models/petr-0488d7795fb94638974d64707e150430
+* author:	javi123xyz (https://sketchfab.com/javi123xyz)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Petr" (https://sketchfab.com/3d-models/petr-0488d7795fb94638974d64707e150430) by javi123xyz (https://sketchfab.com/javi123xyz) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
