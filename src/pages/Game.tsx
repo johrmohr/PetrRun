@@ -23,11 +23,13 @@ export default function Game() {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(3);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<number>(1.5); // default zoom
 
   // Start selection: player clicks map to set start
   const handleMapClick = (position: { x: number; y: number }) => {
     if (phase === "start") {
       setPlayerPos([position.x, position.y]);
+      setZoomLevel(2.5); // Zoom in after selecting start
     }
   };
 
@@ -164,7 +166,7 @@ export default function Game() {
       <div className="w-full h-full">
         <GameMap
           center={playerPos || GAME_CONFIG.MAP.DEFAULT_CENTER}
-          zoom={18}
+          zoom={zoomLevel}
           playerPosition={playerPos || undefined}
           imageDimensions={imageDimensions}
           gamePhase={phase}

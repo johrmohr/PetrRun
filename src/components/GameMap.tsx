@@ -214,6 +214,7 @@ const GameMap: React.FC<GameMapProps> = ({
   width = "100%",
   imageDimensions,
   gamePhase,
+  zoom, // <-- add zoom prop here
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -222,6 +223,13 @@ const GameMap: React.FC<GameMapProps> = ({
     const savedZoom = localStorage.getItem('petrrun-zoom-level');
     return savedZoom ? parseFloat(savedZoom) : 2.5;
   });
+
+  // Add this effect to update zoomLevel when zoom prop changes
+  useEffect(() => {
+    if (typeof zoom === 'number' && zoom !== zoomLevel) {
+      setZoomLevel(zoom);
+    }
+  }, [zoom]);
 
   useEffect(() => {
     if (collision.isLoaded && !collision.isLoading) {
