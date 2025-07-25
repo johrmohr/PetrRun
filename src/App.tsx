@@ -327,20 +327,20 @@ function Test() {
     </div>
   );
 }
+
+const models = [
+  "hatsune_miku_plushie",
+  "petr",
+  "anteater_plushie",
+]
+
+const picked_model = models[Math.floor(Math.random() * models.length)];
+console.log(picked_model);
 export function Model() {
-  const { nodes, materials } = useGLTF("/models/petr/scene.gltf");
+  const { scene } = useGLTF(`/models/${picked_model}/scene.gltf`);
   return (
-    <group dispose={null} scale={1}>
-      <mesh
-        castShadow
-        receiveShadow
-        // @ts-expect-error: TypeScript doesn't recognize the geometry type
-        geometry={nodes.Object_4.geometry}
-        material={materials.petr_hd_Merged_Material}
-        rotation={[0, 0, 0]}
-      />
-    </group>
+    <primitive object={scene} />
   );
 }
 
-useGLTF.preload("/models/petr/scene.gltf");
+useGLTF.preload("/models/hatsune_miku_plushie/scene.gltf");
