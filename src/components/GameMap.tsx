@@ -61,7 +61,7 @@ function WASDControls({
       const deltaTime = Math.min((timestamp - lastUpdate.current) / 1000, 0.1); // Cap deltaTime at 100ms
       lastUpdate.current = timestamp;
 
-      const baseMoveSpeed = 300; // Pixels per second
+      const baseMoveSpeed = 150; // Pixels per second (reduced from 300)
       const currentSpeed = collision.isLoaded
         ? collision.calculateSpeed(playerPosition[0], playerPosition[1], baseMoveSpeed)
         : baseMoveSpeed;
@@ -390,8 +390,7 @@ const GameMap: React.FC<GameMapProps> = ({
       ref={containerRef} 
       className="relative w-full h-full overflow-hidden bg-gray-200"
       onWheel={handleWheel}
->.
-
+    >
       <WASDControls
         onPlayerMove={onPlayerMove}
         playerPosition={playerPosition}
