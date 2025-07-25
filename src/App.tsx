@@ -5,6 +5,7 @@ import FaultyTerminal from "./components/FaultyTerminal";
 import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import { OrbitControls, useGLTF } from "@react-three/drei";
+import Button from "./components/Button";
 const stickerUrls = [
   "/stickers/Space-Explorr-Petr.png",
   "/stickers/Thanos.png",
@@ -193,16 +194,14 @@ export default function App() {
               </div>
               {/* Start button */}
               <div className="text-center w-max mx-auto">
-                <button
+                <Button
                   onClick={handleStartGame}
-                  className="relative btn btn-primary btn-lg px-12 py-6 font-extrabold text-2xl sm:text-3xl tracking-wider shadow-[0_6px_0_#1e293b,0_10px_20px_rgba(0,0,0,0.25)] border-0 bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 text-white skew-x-[-12deg] transition-transform duration-150 active:translate-y-1 active:shadow-[0_2px_0_#1e293b,0_4px_8px_rgba(0,0,0,0.25)] before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/30 before:to-transparent before:opacity-60 before:pointer-events-none overflow-hidden group"
-                  style={{ boxShadow: '0 6px 0 #1e293b, 0 10px 20px rgba(0,0,0,0.25)' }}
+                  className="w-full"
                 >
                   <span className="flex items-center justify-center gap-4 -skew-x-[-12deg] drop-shadow-[0_2px_0_rgba(0,0,0,0.2)]">
                     🎮 <span>Click to Start</span> ✨
                   </span>
-                  <span className="absolute left-0 bottom-0 w-full h-2 bg-black/30 rounded-b-2xl blur-sm opacity-60 pointer-events-none" />
-                </button>
+                </Button>
                 <p className="text-xs sm:text-sm text-grey-100 font-medium mt-2">
                   P.S. You can click and drag some stickers — try peeling them off
                   the screen!
@@ -290,12 +289,12 @@ export default function App() {
 
         {/* Skip tutorial */}
         <div className="absolute top-8 right-8 z-40">
-          <button
+          <Button
             onClick={handleSkipTutorial}
-            className="px-6 py-3 bg-gray-800/80 backdrop-blur-sm text-gray-300 text-sm font-medium rounded-lg border border-gray-600/50 hover:bg-gray-700/80 hover:text-white transition-all duration-200 hover:scale-105"
+            className="px-6 py-3 text-sm font-medium"
           >
             ⏭️ Skip Tutorial
-          </button>
+          </Button>
         </div>
 
         {/* Ambient dots */}

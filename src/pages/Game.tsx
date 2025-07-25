@@ -8,6 +8,7 @@ import {
   stickerUrls,
 } from "../utils/constants";
 import type { Dropsite } from "../utils/types";
+import Button from "@/components/Button";
 
 // Game states
 type GamePhase =
@@ -192,12 +193,12 @@ export default function Game() {
                 Time: {(timer / 1000).toFixed(2)}s
               </p>
               {/* Difficulty label hidden for consistency */}
-              <button
+              <Button
                 onClick={handleRestart}
-                className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
+                className="w-full"
               >
                 🎮 Play Again
-              </button>
+              </Button>
             </div>
           )}
           {/* Map always visible, but disables controls except in playing phase */}

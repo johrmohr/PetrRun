@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import SVGAnimation from "./SVGAnimation";
+import Button from "./Button";
 
 interface ImageDimensions {
   width: number;
@@ -94,12 +95,12 @@ const ImagePreloader: React.FC<ImagePreloaderProps> = ({
           <div className="text-6xl mb-4">😞</div>
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Oops!</h2>
           <p className="text-gray-600 mb-6">{error}</p>
-          <button
+          <Button
             onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="w-full"
           >
             🔄 Retry
-          </button>
+          </Button>
         </div>
       </div>
     );
