@@ -179,7 +179,7 @@ export default function App() {
             </h1>
           </div>
           {/* Start button and 3D model in a single glassy card */}
-          <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 z-30 w-full flex justify-center">
+          <div className="absolute bottom-[15%] left-1/2 -translate-x-1/2 z-30 w-full flex justify-center">
             <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-10 bg-white/20 backdrop-blur-xl rounded-3xl shadow-2xl border border-blue-400/30 px-8 py-6 sm:py-8 max-w-2xl mx-auto">
               {/* 3D Model with label */}
               <div className="flex flex-col items-center mb-4 sm:mb-0">
