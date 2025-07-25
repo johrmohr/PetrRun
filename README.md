@@ -1,35 +1,44 @@
 # PetrRun
-
 25' Summer GitHub/UCI Hackathon
 
 Welcome to **PetrRun**, a fast-paced, Zot-filled game built with UCI spirit during the 2025 Summer GitHub/UCI Hackathon!
 
-> "It’s chaotic, it’s late-night, it’s UCI — and now, it’s a game."
+> "It’s chaotic, it’s late-night, it’s UCI — and now, it’s a game."  
+
+Meet Github Petr! (Drawn by one of our very own team members!)
+
+<img src="public/stickers/Github-petr-dark.png" alt="Github Petr" width="150"/>
 
 ## 🎮 What is PetrRun?
 
-PetrRun is a rhythm-based browser game inspired by UCI’s legendary _Petr drops_ and _Zot culture_. Think piano tiles — but with anteater stickers, Zot symbols, and campus chaos. Hit the right Zot move at the right time to rack up points. Miss it? Zot outta luck.
+PetrRun is a speed running based off of GeoGuessr with a twist, a browser game inspired by UCI’s legendary Petr drops and Zot culture. Find the petr on the map, as fast as possible in the hilly terrain of UCI.
 
 ## 🔧 Built With
 
-- React + Vite
+- React + Vite + React Router
 - Tailwind CSS
-- JavaScript animations
-- [Optional] TensorFlow.js (for gesture recognition, if used)
-- Ant-eater themed sticker art 🎨
+- OJL, Threejs
+- Anteater themed sticker art 🎨
 
 ## 🧠 Inspiration
 
-We wanted to build something just for UCI students — something that captures the _fever dream energy_ of college nights, meme culture, and our undying love for campus inside jokes.
+We wanted to build something just for UCI students — something that captures the *fever dream energy* of college nights, meme culture, and our undying love for campus inside jokes.  
 
 And of course… Zot Zot Zot 🐜💥
 
+Thus we sought to emulate the ever-so-famous Petr drops that send UCI students into a craze for mere stickers. Tell any other person about the drops, and you'll be met with, "Seriously?" Petr stickers are a nod to our school mascot, Peter the Anteater, and the mixing pot of interests and cultures that are here are UCI. These Petr stickers are "dropped" by anonymous UCI students at a random location, revealed via a photo on Instagram, at preannounced(or not!) time somewhere on UCI's campus, where students will immediately bolt to *just* for a sticker.
+
+This game simulates exactly that. The player chooses a location anywhere on UCI's campus, and with a countdown of "**3, 2, 1!**" the player will receive an image of some location on UCI's campus. The player will have to identify this location and move their character to that spot on the map to complete the game, just like in a real Petr drop! Players will have to determine the best possible path to the drop site, taking into consideration varying terrain, to get there the fastest and the best possible chance of getting stickers!
+
+Here's a sneak peak at the game!
+
+<img src="public/game_preview.png" alt="Game Preview" width="800"/>
+
 ## 🔊 Features
 
-- Smooth animations with moving Zot-stickers
+- Smooth animations with moving Petr-stickers
 - Background music that fades in for ~vibes~
-- Score system based on timing accuracy
-- Mobile-friendly (kinda chaotic in a fun way)
+- Competitive timing to race against your friends
 
 ## 🚀 Getting Started
 
@@ -44,9 +53,6 @@ npm run dev
 ✨ Contributions
 This project was created for fun by UCI students. Feel free to fork and contribute, or just play around with it!
 
-📸 Screenshots
-(Add a few GIFs or screenshots here if you can!)
-
 🤝 Credits
 UCI & GitHub Summer Hackathon Team
 
@@ -58,4 +64,3 @@ Game logic, Zot vibes, and code chaos by UCI students 💻
 
 
 created new branch
-```
