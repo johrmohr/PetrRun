@@ -168,7 +168,7 @@ export default function App() {
           {/* Background grid pattern */}
           <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
           {/* Welcome text - moved further up */}
-          <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20">
+          <div className="absolute top-[25%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20">
             <h1 className="text-6xl sm:text-7xl md:text-8xl font-bold text-white mb-8 animate-fadeInUp leading-tight">
               <span className="whitespace-nowrap bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent block">
                 Welcome to UCI's
