@@ -64,3 +64,11 @@ Game logic, Zot vibes, and code chaos by UCI students 💻
 
 
 created new branch
+```
+
+## 🛠️ In the Works
+
+- Customization page to choose your own Petr avatar!
+- Live racing with other players
+- A more comprehensive history on Petr culture and introduction to the game
+- More obstacles to make the game more interactive, like the infamous e-scooters of Ring Road, solicitors, the elements, and more!
